@@ -3,11 +3,13 @@ import type {
   FileContributionReport,
   FileContributorReport,
 } from "bus-lib";
-import { StatusBadge } from "./StatusBadge.js";
+import { useState } from "react";
 
 interface BusFactorSectionProps {
   section: BusfactorReportSection;
 }
+
+type TableDensity = "default" | "compact";
 
 const numberFormatter = new Intl.NumberFormat("en-US");
 const percentFormatter = new Intl.NumberFormat("en-US", {
@@ -21,9 +23,32 @@ const formatPercent = (value: number) => `${percentFormatter.format(value)}%`;
 const formatEditLabel = (editCount: number) =>
   `${formatCount(editCount)} ${editCount === 1 ? "edit" : "edits"}`;
 
+const formatContributorLabel = (contributorCount: number) =>
+  `${formatCount(contributorCount)} active ${
+    contributorCount === 1 ? "contributor" : "contributors"
+  }`;
+
 const formatFileLabel = (fileCount: number, qualifier?: string) => {
   const label = fileCount === 1 ? "file" : "files";
   return `${formatCount(fileCount)} ${qualifier === undefined ? "" : `${qualifier} `}${label}`;
+};
+
+const formatStatsValue = (file: FileContributionReport) =>
+  `${formatCount(file.totalEdits)} (${formatCount(file.activeContributorCount)})`;
+
+const getStatsCellLabel = (file: FileContributionReport) =>
+  [
+    file.path,
+    formatEditLabel(file.totalEdits),
+    formatContributorLabel(file.activeContributorCount),
+    file.isRisk ? "High Risk" : undefined,
+  ]
+    .filter((part): part is string => part !== undefined)
+    .join(", ");
+
+const getBaseName = (path: string) => {
+  const parts = path.split(/[\\/]/);
+  return parts[parts.length - 1] ?? path;
 };
 
 const getSectionAuthors = (
@@ -47,39 +72,50 @@ const findContributor = (
 const ContributorCell = ({
   author,
   contributor,
+  density,
   path,
 }: {
   author: string;
   contributor: FileContributorReport | undefined;
+  density: TableDensity;
   path: string;
 }) => {
   const contributionPercent = contributor?.contributionPercent ?? 0;
   const editCount = contributor?.editCount ?? 0;
   const isActive = contributor?.isActive ?? false;
+  const label = `${path}, ${author} contribution: ${formatPercent(
+    contributionPercent,
+  )}, ${formatEditLabel(editCount)}`;
+  const isCompact = density === "compact";
 
   return (
     <td
-      aria-label={`${path}, ${author} contribution: ${formatPercent(
-        contributionPercent,
-      )}, ${formatEditLabel(editCount)}`}
-      className={`px-3 py-4 align-top ${
+      aria-label={label}
+      className={`${isCompact ? "px-2 py-2" : "px-3 py-4"} align-top ${
         isActive ? "bg-[#f4eefc]" : "bg-transparent"
       }`}
+      title={label}
     >
-      <div className="flex min-w-28 flex-col gap-1">
+      <div
+        className={`flex ${isCompact ? "min-w-20" : "min-w-28"} flex-col gap-1`}
+      >
         <span className="font-semibold text-[#221635]">
           {formatPercent(contributionPercent)}
         </span>
-        <span className="text-xs font-medium text-[#62576f]">
-          {formatEditLabel(editCount)}
-        </span>
+        {!isCompact && (
+          <span className="text-xs font-medium text-[#62576f]">
+            {formatEditLabel(editCount)}
+          </span>
+        )}
       </div>
     </td>
   );
 };
 
 export const BusFactorSection = ({ section }: BusFactorSectionProps) => {
+  const [density, setDensity] = useState<TableDensity>("default");
   const authors = getSectionAuthors(section.files);
+  const isCompact = density === "compact";
 
   return (
     <section
@@ -109,67 +145,121 @@ export const BusFactorSection = ({ section }: BusFactorSectionProps) => {
           No tracked files in this section.
         </p>
       ) : (
-        <div className="mt-5 overflow-x-auto">
-          <table className="min-w-full border-collapse text-left text-sm">
-            <caption className="sr-only">
-              Bus factor by file for {section.label}
-            </caption>
-            <thead>
-              <tr className="border-b border-[#d8d0c4] text-xs uppercase tracking-[0.14em] text-[#62576f]">
-                <th className="min-w-72 py-3 pr-4 font-semibold" scope="col">
-                  File Path
-                </th>
-                <th className="min-w-28 px-3 py-3 font-semibold" scope="col">
-                  Total Edits
-                </th>
-                <th className="min-w-40 px-3 py-3 font-semibold" scope="col">
-                  Active Contributors
-                </th>
-                <th className="min-w-28 px-3 py-3 font-semibold" scope="col">
-                  Status
-                </th>
-                {authors.map((author) => (
+        <>
+          <div className="mt-5 flex flex-col gap-3 border-y border-[#ece4d8] py-3 sm:flex-row sm:items-center sm:justify-between">
+            <fieldset
+              aria-label={`${section.label} table density`}
+              className="flex flex-wrap items-center gap-3"
+            >
+              <legend className="mr-1 text-xs font-semibold uppercase tracking-[0.14em] text-[#62576f] sm:float-left">
+                View
+              </legend>
+              {(["default", "compact"] as const).map((mode) => (
+                <label
+                  className="inline-flex items-center gap-2 text-sm font-semibold text-[#221635]"
+                  key={mode}
+                >
+                  <input
+                    checked={density === mode}
+                    className="accent-[#4e2a84]"
+                    name={`${section.id}-table-density`}
+                    onChange={() => {
+                      setDensity(mode);
+                    }}
+                    type="radio"
+                    value={mode}
+                  />
+                  {mode === "default" ? "Default" : "Compact"}
+                </label>
+              ))}
+            </fieldset>
+            <p className="inline-flex items-center gap-2 text-sm font-medium text-[#62576f]">
+              <span
+                aria-hidden="true"
+                className="inline-block size-3 rounded-sm border border-[#f5b453] bg-[#fff3e6]"
+              />
+              <span>High Risk stats cells are highlighted.</span>
+            </p>
+          </div>
+
+          <div className="mt-4 overflow-x-auto">
+            <table
+              className={`min-w-full border-collapse text-left ${
+                isCompact ? "text-xs" : "text-sm"
+              }`}
+            >
+              <caption className="sr-only">
+                Bus factor by file for {section.label}
+              </caption>
+              <thead>
+                <tr className="border-b border-[#d8d0c4] text-xs uppercase tracking-[0.14em] text-[#62576f]">
                   <th
-                    className="min-w-32 px-3 py-3 font-semibold"
-                    key={author}
+                    className={`${isCompact ? "min-w-48 py-2" : "min-w-72 py-3"} pr-4 font-semibold`}
                     scope="col"
                   >
-                    {author}
+                    File Path
                   </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-[#ece4d8]">
-              {section.files.map((file) => (
-                <tr key={file.path}>
                   <th
-                    className="py-4 pr-4 align-top font-mono text-sm font-semibold text-[#221635]"
-                    scope="row"
+                    className={`${isCompact ? "min-w-28 px-2 py-2" : "min-w-40 px-3 py-3"} font-semibold`}
+                    scope="col"
                   >
-                    {file.path}
+                    Edits (contributors)
                   </th>
-                  <td className="px-3 py-4 align-top font-semibold text-[#221635]">
-                    {formatCount(file.totalEdits)}
-                  </td>
-                  <td className="px-3 py-4 align-top font-semibold text-[#221635]">
-                    {formatCount(file.activeContributorCount)}
-                  </td>
-                  <td className="px-3 py-4 align-top">
-                    <StatusBadge isRisk={file.isRisk} />
-                  </td>
                   {authors.map((author) => (
-                    <ContributorCell
-                      author={author}
-                      contributor={findContributor(file.contributors, author)}
+                    <th
+                      className={`${isCompact ? "min-w-24 px-2 py-2" : "min-w-32 px-3 py-3"} font-semibold`}
                       key={author}
-                      path={file.path}
-                    />
+                      scope="col"
+                    >
+                      {author}
+                    </th>
                   ))}
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody className="divide-y divide-[#ece4d8]">
+                {section.files.map((file) => {
+                  const fileLabel = isCompact
+                    ? getBaseName(file.path)
+                    : file.path;
+                  const statsCellClass = file.isRisk
+                    ? "border-l-4 border-[#f5b453] bg-[#fff3e6] text-[#8a3b0a]"
+                    : "text-[#221635]";
+
+                  return (
+                    <tr key={file.path}>
+                      <th
+                        aria-label={isCompact ? file.path : undefined}
+                        className={`${isCompact ? "py-2 text-xs" : "py-4 text-sm"} pr-4 align-top font-mono font-semibold text-[#221635]`}
+                        scope="row"
+                        title={isCompact ? file.path : undefined}
+                      >
+                        {fileLabel}
+                      </th>
+                      <td
+                        aria-label={getStatsCellLabel(file)}
+                        className={`${isCompact ? "px-2 py-2" : "px-3 py-4"} align-top font-semibold ${statsCellClass}`}
+                      >
+                        {formatStatsValue(file)}
+                      </td>
+                      {authors.map((author) => (
+                        <ContributorCell
+                          author={author}
+                          contributor={findContributor(
+                            file.contributors,
+                            author,
+                          )}
+                          density={density}
+                          key={author}
+                          path={file.path}
+                        />
+                      ))}
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </>
       )}
     </section>
   );

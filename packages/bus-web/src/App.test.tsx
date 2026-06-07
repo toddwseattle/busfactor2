@@ -286,16 +286,18 @@ describe("App", () => {
       within(overallTable).getByRole("columnheader", { name: "File Path" }),
     ).toBeInTheDocument();
     expect(
-      within(overallTable).getByRole("columnheader", { name: "Total Edits" }),
-    ).toBeInTheDocument();
-    expect(
       within(overallTable).getByRole("columnheader", {
-        name: "Active Contributors",
+        name: "Edits (contributors)",
       }),
     ).toBeInTheDocument();
     expect(
-      within(overallTable).getByRole("columnheader", { name: "Status" }),
-    ).toBeInTheDocument();
+      within(overallTable).queryByRole("columnheader", {
+        name: "Total Edits",
+      }),
+    ).not.toBeInTheDocument();
+    expect(
+      within(overallTable).queryByRole("columnheader", { name: "Status" }),
+    ).not.toBeInTheDocument();
     expect(
       within(overallTable).getByRole("columnheader", { name: "Alice Example" }),
     ).toBeInTheDocument();
@@ -307,14 +309,15 @@ describe("App", () => {
     ).toBeInTheDocument();
 
     expect(within(overallTable).getByText("src/app.js")).toBeInTheDocument();
+    expect(within(overallTable).getByText("3 (3)")).toBeInTheDocument();
     expect(
       within(overallTable).getByRole("cell", {
         name: "src/app.js, Alice Example contribution: 36.7%, 1 edit",
       }),
     ).toBeInTheDocument();
     expect(
-      within(overallTable).getAllByText("High Risk").length,
-    ).toBeGreaterThan(0);
+      screen.getByText("High Risk stats cells are highlighted."),
+    ).toBeInTheDocument();
 
     expect(
       screen.queryByRole("table", { name: "Bus factor by file for TS/JS/CSS" }),

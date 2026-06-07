@@ -1,4 +1,10 @@
-import { cleanup, render, screen, within } from "@testing-library/react";
+import {
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+  within,
+} from "@testing-library/react";
 import { afterEach, describe, expect, it } from "vitest";
 import type { BusfactorReportSection } from "bus-lib";
 import { BusFactorSection } from "./BusFactorSection.js";
@@ -32,30 +38,39 @@ const createSection = (): BusfactorReportSection => ({
     },
     {
       path: "src/shared.ts",
-      totalEdits: 3,
+      totalEdits: 7,
       lastEditedAt: "2024-02-02T12:00:00.000Z",
-      totalWeightedActivity: 3,
-      compatibilityFrecency: 3,
-      activeContributorCount: 2,
+      totalWeightedActivity: 7,
+      compatibilityFrecency: 7,
+      activeContributorCount: 3,
       riskContributorThreshold: 2,
       isRisk: false,
       contributors: [
         {
-          author: "Bob Example",
-          editCount: 2,
-          lastEditedAt: "2024-02-02T12:00:00.000Z",
-          weightedActivity: 2,
-          compatibilityFrecency: 2,
-          contributionPercent: 66.666,
-          isActive: true,
-        },
-        {
-          author: "Cara Example",
+          author: "Alice Example",
           editCount: 1,
           lastEditedAt: "2024-02-01T12:00:00.000Z",
           weightedActivity: 1,
           compatibilityFrecency: 1,
-          contributionPercent: 33.334,
+          contributionPercent: 14.286,
+          isActive: true,
+        },
+        {
+          author: "Bob Example",
+          editCount: 4,
+          lastEditedAt: "2024-02-02T12:00:00.000Z",
+          weightedActivity: 4,
+          compatibilityFrecency: 4,
+          contributionPercent: 57.143,
+          isActive: true,
+        },
+        {
+          author: "Cara Example",
+          editCount: 2,
+          lastEditedAt: "2024-02-01T12:00:00.000Z",
+          weightedActivity: 2,
+          compatibilityFrecency: 2,
+          contributionPercent: 28.571,
           isActive: true,
         },
       ],
@@ -88,7 +103,7 @@ describe("BusFactorSection", () => {
     ).toBeInTheDocument();
   });
 
-  it("renders file rows with paths, edit counts, and active contributor counts", () => {
+  it("renders default mode headers and combined edit/contributor stats", () => {
     render(<BusFactorSection section={createSection()} />);
 
     expect(
@@ -98,14 +113,17 @@ describe("BusFactorSection", () => {
       screen.getByRole("columnheader", { name: "File Path" }),
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("columnheader", { name: "Total Edits" }),
+      screen.getByRole("columnheader", { name: "Edits (contributors)" }),
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("columnheader", { name: "Active Contributors" }),
-    ).toBeInTheDocument();
+      screen.queryByRole("columnheader", { name: "Total Edits" }),
+    ).not.toBeInTheDocument();
     expect(
-      screen.getByRole("columnheader", { name: "Status" }),
-    ).toBeInTheDocument();
+      screen.queryByRole("columnheader", { name: "Active Contributors" }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("columnheader", { name: "Status" }),
+    ).not.toBeInTheDocument();
     expect(
       screen.getByRole("columnheader", { name: "Alice Example" }),
     ).toBeInTheDocument();
@@ -118,22 +136,47 @@ describe("BusFactorSection", () => {
 
     const riskyRow = within(rowForPath("src/risky.ts"));
     expect(riskyRow.getByText("src/risky.ts")).toBeInTheDocument();
-    expect(riskyRow.getByText("2")).toBeInTheDocument();
-    expect(riskyRow.getByText("1")).toBeInTheDocument();
+    expect(riskyRow.getByText("2 (1)")).toBeInTheDocument();
 
     const sharedRow = within(rowForPath("src/shared.ts"));
     expect(sharedRow.getByText("src/shared.ts")).toBeInTheDocument();
-    expect(sharedRow.getByText("3")).toBeInTheDocument();
-    expect(sharedRow.getByText("2")).toBeInTheDocument();
+    expect(sharedRow.getByText("7 (3)")).toBeInTheDocument();
+    expect(
+      sharedRow.getByRole("cell", {
+        name: "src/shared.ts, 7 edits, 3 active contributors",
+      }),
+    ).toBeInTheDocument();
   });
 
-  it("renders High Risk only for risky files and does not render Low Familiarity", () => {
+  it("labels high-risk stats cells accessibly and includes a visible legend", () => {
     render(<BusFactorSection section={createSection()} />);
 
-    expect(screen.getAllByText("High Risk")).toHaveLength(1);
     expect(
-      within(rowForPath("src/risky.ts")).getByText("High Risk"),
+      screen.getByText("High Risk stats cells are highlighted."),
     ).toBeInTheDocument();
+    const riskyStatsCell = within(rowForPath("src/risky.ts")).getByRole(
+      "cell",
+      {
+        name: "src/risky.ts, 2 edits, 1 active contributor, High Risk",
+      },
+    );
+    expect(riskyStatsCell).toHaveClass("bg-[#fff3e6]");
+    expect(riskyStatsCell).toHaveClass("border-l-4");
+    expect(within(rowForPath("src/shared.ts")).queryByText("High Risk")).toBe(
+      null,
+    );
+    expect(
+      within(rowForPath("src/shared.ts")).getByRole("cell", {
+        name: "src/shared.ts, 7 edits, 3 active contributors",
+      }),
+    ).toBeInTheDocument();
+    expect(screen.queryByText(/Low Familiarity/i)).not.toBeInTheDocument();
+  });
+
+  it("keeps High Risk as the only risk label", () => {
+    render(<BusFactorSection section={createSection()} />);
+
+    expect(screen.getByText(/High Risk stats cells/)).toBeInTheDocument();
     expect(within(rowForPath("src/shared.ts")).queryByText("High Risk")).toBe(
       null,
     );
@@ -153,20 +196,71 @@ describe("BusFactorSection", () => {
     ).toBeInTheDocument();
 
     const sharedRow = within(rowForPath("src/shared.ts"));
-    expect(sharedRow.getByText("66.7%")).toBeInTheDocument();
+    expect(sharedRow.getByText("57.1%")).toBeInTheDocument();
+    expect(sharedRow.getByText("4 edits")).toBeInTheDocument();
+    expect(sharedRow.getByText("28.6%")).toBeInTheDocument();
     expect(sharedRow.getByText("2 edits")).toBeInTheDocument();
-    expect(sharedRow.getByText("33.3%")).toBeInTheDocument();
-    expect(sharedRow.getByText("1 edit")).toBeInTheDocument();
     expect(
       sharedRow.getByRole("cell", {
-        name: "src/shared.ts, Bob Example contribution: 66.7%, 2 edits",
+        name: "src/shared.ts, Bob Example contribution: 57.1%, 4 edits",
       }),
     ).toBeInTheDocument();
     expect(
       sharedRow.getByRole("cell", {
-        name: "src/shared.ts, Cara Example contribution: 33.3%, 1 edit",
+        name: "src/shared.ts, Cara Example contribution: 28.6%, 2 edits",
       }),
     ).toBeInTheDocument();
+  });
+
+  it("toggles compact mode through the density radio group", () => {
+    render(<BusFactorSection section={createSection()} />);
+
+    const defaultRadio = screen.getByRole("radio", { name: "Default" });
+    const compactRadio = screen.getByRole("radio", { name: "Compact" });
+
+    expect(defaultRadio).toBeChecked();
+    expect(compactRadio).not.toBeChecked();
+
+    fireEvent.click(compactRadio);
+
+    expect(defaultRadio).not.toBeChecked();
+    expect(compactRadio).toBeChecked();
+  });
+
+  it("shows compact basenames while preserving full file paths", () => {
+    render(<BusFactorSection section={createSection()} />);
+
+    fireEvent.click(screen.getByRole("radio", { name: "Compact" }));
+
+    expect(screen.getByText("risky.ts")).toBeInTheDocument();
+    expect(screen.getByText("shared.ts")).toBeInTheDocument();
+    expect(screen.queryByText("src/risky.ts")).not.toBeInTheDocument();
+
+    const riskyHeader = screen.getByRole("rowheader", {
+      name: "src/risky.ts",
+    });
+    expect(riskyHeader).toHaveAttribute("title", "src/risky.ts");
+  });
+
+  it("shows compact contributor percentages while preserving edit counts accessibly", () => {
+    render(<BusFactorSection section={createSection()} />);
+
+    fireEvent.click(screen.getByRole("radio", { name: "Compact" }));
+
+    const sharedRow = within(
+      screen.getByRole("rowheader", { name: "src/shared.ts" }).closest("tr") ??
+        document.body,
+    );
+    expect(sharedRow.getByText("57.1%")).toBeInTheDocument();
+    expect(sharedRow.queryByText("4 edits")).not.toBeInTheDocument();
+
+    const bobCell = sharedRow.getByRole("cell", {
+      name: "src/shared.ts, Bob Example contribution: 57.1%, 4 edits",
+    });
+    expect(bobCell).toHaveAttribute(
+      "title",
+      "src/shared.ts, Bob Example contribution: 57.1%, 4 edits",
+    );
   });
 
   it("renders a clear empty state instead of an empty table", () => {
