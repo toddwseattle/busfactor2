@@ -13,3 +13,11 @@ Icon
 # test data
 gitlog.txt
 samples
+
+# Node workspace
+node_modules/
+dist/
+coverage/
+
+# Vite
+.vite/

@@ -1,0 +1,23 @@
+{
+  "name": "bus-cli",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Yargs-based command line interface for Busfactor2.",
+  "type": "module",
+  "bin": {
+    "busfactor": "./dist/index.js"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "predev": "npm run build",
+    "dev": "node dist/index.js",
+    "test": "vitest run",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "bus-lib": "0.0.0",
+    "yargs": "^17.7.2"
+  }
+}
