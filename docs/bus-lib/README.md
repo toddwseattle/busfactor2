@@ -61,17 +61,30 @@ packages/bus-lib/
 
 ## Public API Direction
 
-Initial public exports should include:
+Current public exports include:
 
 - `analyzeGitLog(text, options?)`
 - `parseGitLog(text)`
-- `classifyPath(path, categories?)`
-- `createEmptyReport(source, options?)`
-- `DEFAULT_SOURCE_CATEGORIES`
+- `createEmptyReport()`
 - `DEFAULT_ANALYSIS_OPTIONS`
+- `DEFAULT_REPORT_SECTIONS`
+- `DEFAULT_SECTION_IDS`
 - report and options types
 
 Public functions should use named exports from `src/index.ts`.
+
+`analyzeGitLog` accepts prepared `git log --no-merges --name-status <ref>` text
+and returns a deterministic `busfactor.report.v1` report. The report includes:
+
+- sorted `authors`
+- UTC ISO Sunday `weeks`
+- per-author weekly commit counts
+- section file rows with edit counts, last edit timestamps, frequency weighted
+  by recency, active contributor counts, and risk flags
+
+The legacy browser app called the weighted activity value `frecency`. Busfactor2
+uses `weightedActivity` and `totalWeightedActivity` in public types, and keeps
+`compatibilityFrecency` fields while this migration slice is being verified.
 
 ## Report Sections
 
@@ -84,6 +97,29 @@ Public functions should use named exports from `src/index.ts`.
 
 `overall` is derived from the selected source categories. It must not be a
 separate file matcher.
+
+The first CLI legacy slice maps the old browser app's tracked extensions
+(`.js`, `.jsx`, `.ts`, `.tsx`, `.css`, `.html`, `.htm`, and `.yml`) into the
+`ts-js-css` section for compatibility. `python` and `markdown` are present but
+empty until category expansion work follows. HTML and YAML in `ts-js-css` are a
+compatibility bridge, not the final category model.
+
+The fixture for this behavior is
+`packages/bus-lib/test/fixtures/legacy-git-log.txt`.
+
+## Legacy Compatibility Notes
+
+- Tracked name-status codes are exactly `A`, `C`, and `M`.
+- Ignored path segments are `node_modules`, `build`, and `dist`.
+- Defaults remain a 7-day half-life, 5 percent active contributor threshold, and
+  fewer than 3 active contributors is risky.
+- The legacy app code counts commits when it reads each `Date:` line, so a
+  delete-only commit contributes to weekly commit counts even though delete file
+  lines do not contribute to file activity. This differs from the legacy README
+  wording and is preserved as code compatibility.
+- The legacy app rendered week labels with `toLocaleDateString()`. Busfactor2
+  stores week buckets as UTC ISO Sunday dates such as `2024-02-04` to keep JSON
+  deterministic across machines.
 
 ## Testing
 

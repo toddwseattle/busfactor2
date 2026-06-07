@@ -54,7 +54,12 @@ Milestone 1 gets the CLI working with the old browser app functionality using
 the real analyzer from `bus-lib`. Keep parsing, scoring, and report construction
 out of `bus-cli`.
 
+Status: CLI-M1-0 through CLI-M1-4 are implemented for the first CLI legacy
+functionality slice.
+
 ### CLI-M1-0 — Expand top-level and `analyze` options for the first real slice
+
+Status: implemented.
 
 **Files:** `packages/bus-cli/src/commands/analyze.ts`,
 `packages/bus-cli/src/index.ts`
@@ -80,6 +85,8 @@ implementing all future CLI options.
 
 ### CLI-M1-1 — Implement input loaders
 
+Status: implemented.
+
 **Goal:** Support repo, file, and stdin input.
 
 **Required change:**
@@ -100,6 +107,8 @@ implementing all future CLI options.
 
 ### CLI-M1-2 — Wire `analyze` to `bus-lib`
 
+Status: implemented.
+
 **Goal:** Replace smoke output with real analysis from the shared package.
 
 **Required change:**
@@ -116,6 +125,8 @@ implementing all future CLI options.
 - Tests prove the CLI does not import `bus-lib` internals.
 
 ### CLI-M1-3 — Implement human and agent formatters
+
+Status: implemented.
 
 **Goal:** Render readable console output and deterministic JSON.
 
@@ -134,6 +145,8 @@ implementing all future CLI options.
 - Agent formatter emits parseable JSON with no prose.
 
 ### CLI-M1-4 — Add end-to-end fixture command tests
+
+Status: implemented.
 
 **Goal:** Prove old browser app functionality is reachable through the CLI.
 
