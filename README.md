@@ -1,59 +1,112 @@
-This tool analyzes **git log** output to identify potential team and bus factor issues for small
-developer teams. 
+# Busfactor2
 
-# Usage
+Busfactor2 is the planned TypeScript evolution of the original
+[`criesbeck/busfactor`](https://github.com/criesbeck/busfactor) browser app.
 
-Run **git log** as follows.
+The tool analyzes git history to help small teams see:
+
+- weekly commit participation by author
+- files with low contributor overlap
+- bus factor risk across source and documentation areas
+
+The new project target is:
+
+```text
+toddwseattle/busfactor2
 ```
+
+Milestone 0 is complete. The original static app implementation is preserved
+under `legacy/criesbeck-browser-app`, while the root contains the TypeScript npm
+workspace foundation.
+
+## Packages
+
+Busfactor2 is an npm workspace with three packages:
+
+- `bus-lib`: shared TypeScript library foundation for report constants, public
+  types, and deterministic smoke report objects.
+- `bus-cli`: yargs-based Node CLI with smoke help and `analyze --agent` JSON
+  output.
+- `bus-web`: React + Vite web app with smoke upload and section placeholders.
+
+## Planned Report Sections
+
+Reports will include:
+
+- `overall`: derived rollup over selected source categories
+- `ts-js-css`: TypeScript, JavaScript, and CSS files
+- `python`: Python files
+- `markdown`: Markdown files
+
+The `overall` section is computed from the selected source categories. It is not
+matched independently, which avoids double-counting.
+
+## Current Docs
+
+Start here:
+
+- [Vision](docs/busfactor2/overview-vision.md)
+- [CLI legacy functionality plan](docs/busfactor2/cli-legacy-functionality-plan.md)
+- [Milestone 0 completion record](docs/milestone-0/README.md)
+- [Using this repo with agents](docs/using-this-repo.md)
+- [bus-lib docs](docs/bus-lib/README.md)
+- [bus-cli docs](docs/bus-cli/README.md)
+- [bus-web docs](docs/bus-web/README.md)
+
+Agent instructions:
+
+- [.github/copilot-instructions.md](.github/copilot-instructions.md)
+- [AGENTS.md](AGENTS.md)
+- [CLAUDE.md](CLAUDE.md)
+
+## Current Status
+
+Milestone 0 is complete:
+
+- current top-level documentation exists
+- Copilot, Codex, and Claude routing files exist
+- package-specific docs and work items exist
+- npm workspace scaffold exists
+- smoke versions of `bus-lib`, `bus-cli`, and `bus-web` build and test
+- Vitest runs in all packages
+- Husky + lint-staged git hooks are installed
+- the original static browser app is preserved under `legacy/`
+- the new repository remote is `toddwseattle/busfactor2`
+- branch `codex-milestone-0` is pushed to the new repository
+
+The next implementation focus is CLI parity with the old browser app:
+
+- port legacy parsing, weekly commits, weighted frequency scoring, and bus
+  factor risk logic into `bus-lib`
+- wire `bus-cli analyze` to a local repo path first, then input files and stdin
+- emit deterministic JSON for agents and compact human output for terminals
+
+## Workspace Commands
+
+Use these commands for current workspace verification:
+
+```bash
+npm install
+npm run build --workspaces
+npm run test --workspaces
+npm run typecheck --workspaces
+npm --workspace bus-cli run dev -- --help
+npm --workspace bus-cli run dev -- analyze --help
+npm --workspace bus-cli run dev -- analyze --agent
+npm --workspace bus-web run build
+npm --workspace bus-web run dev
+npm run lint-staged
+```
+
+## Original App
+
+The original app analyzes output from:
+
+```bash
 git log --no-merges --name-status main > ~/gitlog.txt
 ```
-Put the output file some place easy to find outside your repository.
 
-Upload the output file to https://criesbeck.github.io/busfactor/. Nothing is stored on the server.
-If you prefer, download and serve **index.html** locally.
-
-# Output
-
-After uploading, the app displays two tables. 
-
-## Commits
-
-The first table is a summary of commits
-per week by each team member since the start of the project. This is comparable to
-the **Contributors** section of the **Insight**
-page of the repo on Github, except that 
-- delete commits are not counted
-- the dates are the end of each week, e.g., the column **3/6/2022** would count
-the commits for the week ending on March 6, 2022. 
-
-Commits are not a measure of work or value. Some commits are trivial, some are major.
-But a team should always be concerned about their processes 
-when there are team members with fewer than two commits
-in a week.
-
-## Bus factor
-
-The second table displays how often each developer has contributed to each code file. 
-Code file means JavaScript, CSS, HTML, or YAML.
-Most active files are listed first. Activity is based on number and recency of edits.
-The cells of the table show what percentage each developer contributed to the activity on each file.
-
-![Example contributions](./images/bus-factor-1.png)
-
-Developers who have contributed less than 5% to a file are highlighted. 
-These developers should be first in line for future work on those files.
-
-Active files with only one or two contributors over 5% are 
-bus factor risks and are highlighted. Pay particular attention to bus factor
-issues in the top ten or so file. 
-Future work on those files should include other team members.
-
-![Example bus factor](./images/bus-factor-2.png)
-
-# Customization
-
-Clone this repository. 
-
-To change what files are tracked, edit the regular expressions in  **EDIT_PAT**.
-
-To change the threshold for being an active contributor, change **THRESHOLD**.
+The current static implementation is copied into
+`legacy/criesbeck-browser-app` so the parser, scoring, and UI behavior can be
+migrated deliberately into the new packages. Treat the legacy snapshot as
+read-only reference unless intentionally updating the migration baseline.
