@@ -24,12 +24,17 @@ describe("bus-cli analyze behavior", () => {
 
     const report = JSON.parse(output[0] ?? "");
     expect(report.summary).toEqual({
-      totalFiles: 9,
-      riskFiles: 8,
+      totalFiles: 7,
+      riskFiles: 6,
       authorCount: 3,
       weekCount: 2,
     });
     expect(report.sections[0].files[0].path).toBe("src/app.js");
+    expect(
+      report.sections
+        .find((section: { id: string }) => section.id === "markdown")
+        ?.files.map((file: { path: string }) => file.path),
+    ).toEqual(["docs/readme.md"]);
   });
 
   it("exposes the analyze command in top-level help", async () => {
@@ -131,7 +136,7 @@ describe("bus-cli analyze behavior", () => {
       { loaders: { readFileText: async () => fixture } },
     ).parseAsync();
 
-    expect(JSON.parse(output[0] ?? "").summary.totalFiles).toBe(9);
+    expect(JSON.parse(output[0] ?? "").summary.totalFiles).toBe(7);
   });
 
   it("formats human output with weekly commits and section rows", async () => {
@@ -145,10 +150,12 @@ describe("bus-cli analyze behavior", () => {
 
     expect(output[0]).toContain("Weekly commits:");
     expect(output[0]).toContain("2024-02-04");
-    expect(output[0]).toContain("Overall: 8/9 risk files");
-    expect(output[0]).toContain("TS/JS/CSS: 8/9 risk files");
+    expect(output[0]).toContain("Overall: 6/7 risk files");
+    expect(output[0]).toContain("TS/JS/CSS: 5/6 risk files");
     expect(output[0]).toContain("Python: 0/0 risk files");
+    expect(output[0]).toContain("Markdown: 1/1 risk files");
     expect(output[0]).toContain("src/app.js");
+    expect(output[0]).toContain("docs/readme.md");
   });
 
   it("formats reports without prose in json mode", async () => {

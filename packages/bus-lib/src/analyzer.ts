@@ -3,12 +3,14 @@ import {
   DEFAULT_REPORT_SECTIONS,
   REPORT_SCHEMA_VERSION,
 } from "./constants.js";
+import { DEFAULT_FILE_CATEGORIES, classifyFileChange } from "./categories.js";
 import { parseGitLog } from "./git-log.js";
 import type {
   AuthorCommitStats,
   BusfactorAnalysisOptions,
   BusfactorReport,
   BusfactorReportSection,
+  FileCategoryDefinition,
   FileContributionReport,
   FileContributorReport,
   GitLogCommit,
@@ -16,17 +18,6 @@ import type {
 } from "./types.js";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
-const LEGACY_TRACKED_STATUSES = new Set(["A", "C", "M"]);
-const LEGACY_TRACKED_EXTENSIONS = [
-  ".js",
-  ".jsx",
-  ".ts",
-  ".tsx",
-  ".css",
-  ".html",
-  ".htm",
-  ".yml",
-] as const;
 
 interface MutableContributorStats {
   editCount: number;
@@ -35,6 +26,11 @@ interface MutableContributorStats {
 }
 
 type MutableFileHistory = Map<string, Map<string, MutableContributorStats>>;
+
+interface CategorizedFilePaths {
+  byCategory: Map<string, readonly string[]>;
+  fileOrder: Map<string, number>;
+}
 
 const createContributorStats = (): MutableContributorStats => ({
   editCount: 0,
@@ -64,24 +60,6 @@ const decay = (
   return Math.exp(-lambda * days);
 };
 
-const isLegacyTrackedPath = (path: string): boolean =>
-  LEGACY_TRACKED_EXTENSIONS.some((extension) => path.endsWith(extension));
-
-const isLegacyIgnoredPath = (path: string): boolean => {
-  const normalized = path.replaceAll("\\", "/");
-  const segments = normalized.split("/");
-  return (
-    segments.includes("node_modules") ||
-    segments.includes("build") ||
-    segments.includes("dist")
-  );
-};
-
-const isLegacyTrackedChange = (status: string, path: string): boolean =>
-  LEGACY_TRACKED_STATUSES.has(status) &&
-  isLegacyTrackedPath(path) &&
-  !isLegacyIgnoredPath(path);
-
 const uniqueSortedAuthors = (commits: readonly GitLogCommit[]): string[] =>
   Array.from(new Set(commits.map((commit) => commit.author))).sort();
 
@@ -95,18 +73,43 @@ const uniqueWeeksInEncounterOrder = (
   return Array.from(weeks);
 };
 
-const collectTrackedFilePaths = (
+const collectCategorizedFilePaths = (
   commits: readonly GitLogCommit[],
-): readonly string[] => {
-  const files = new Set<string>();
+  categories: readonly FileCategoryDefinition[],
+): CategorizedFilePaths => {
+  const fileSetsByCategory = new Map<string, Set<string>>();
+  const fileOrder = new Map<string, number>();
+  for (const category of categories) {
+    fileSetsByCategory.set(category.id, new Set());
+  }
+
   for (const commit of commits) {
     for (const change of commit.changedFiles) {
-      if (isLegacyTrackedChange(change.status, change.path)) {
-        files.add(change.path);
+      const classified = classifyFileChange(
+        change.status,
+        change.path,
+        categories,
+      );
+      if (classified === null) {
+        continue;
+      }
+      const categoryFiles = fileSetsByCategory.get(classified.category.id);
+      if (categoryFiles === undefined) {
+        continue;
+      }
+      categoryFiles.add(classified.path);
+      if (!fileOrder.has(classified.path)) {
+        fileOrder.set(classified.path, fileOrder.size);
       }
     }
   }
-  return Array.from(files);
+
+  const byCategory = new Map<string, readonly string[]>();
+  for (const [categoryId, files] of fileSetsByCategory) {
+    byCategory.set(categoryId, Array.from(files));
+  }
+
+  return { byCategory, fileOrder };
 };
 
 const initializeFileHistory = (
@@ -122,6 +125,17 @@ const initializeFileHistory = (
     history.set(file, authorHistory);
   }
   return history;
+};
+
+const initializeCategorizedHistories = (
+  categorizedFiles: CategorizedFilePaths,
+  authors: readonly string[],
+): Map<string, MutableFileHistory> => {
+  const histories = new Map<string, MutableFileHistory>();
+  for (const [categoryId, files] of categorizedFiles.byCategory) {
+    histories.set(categoryId, initializeFileHistory(files, authors));
+  }
+  return histories;
 };
 
 const buildCommitStats = (
@@ -143,6 +157,17 @@ const buildCommitStats = (
     };
   });
 
+const sortFileReports = (
+  files: readonly FileContributionReport[],
+  fileOrder: Map<string, number>,
+): FileContributionReport[] =>
+  [...files].sort((left, right) => {
+    if (right.totalWeightedActivity !== left.totalWeightedActivity) {
+      return right.totalWeightedActivity - left.totalWeightedActivity;
+    }
+    return (fileOrder.get(left.path) ?? 0) - (fileOrder.get(right.path) ?? 0);
+  });
+
 const buildFileReports = (
   history: MutableFileHistory,
   authors: readonly string[],
@@ -152,14 +177,10 @@ const buildFileReports = (
       "activeThreshold" | "halfLifeDays" | "riskContributorCount"
     >
   >,
-): FileContributionReport[] => {
-  const fileOrder = new Map<string, number>();
-  Array.from(history.keys()).forEach((path, index) =>
-    fileOrder.set(path, index),
-  );
-
-  return Array.from(history.entries())
-    .map(([path, authorHistory]) => {
+  fileOrder: Map<string, number>,
+): FileContributionReport[] =>
+  sortFileReports(
+    Array.from(history.entries()).map(([path, authorHistory]) => {
       const totalWeightedActivity = Array.from(authorHistory.values()).reduce(
         (sum, stats) => sum + stats.weightedActivity,
         0,
@@ -215,25 +236,18 @@ const buildFileReports = (
         isRisk: activeContributorCount < options.riskContributorCount,
         contributors,
       };
-    })
-    .sort((left, right) => {
-      if (right.totalWeightedActivity !== left.totalWeightedActivity) {
-        return right.totalWeightedActivity - left.totalWeightedActivity;
-      }
-      return (fileOrder.get(left.path) ?? 0) - (fileOrder.get(right.path) ?? 0);
-    });
-};
+    }),
+    fileOrder,
+  );
 
 const buildSection = (
   id: ReportSectionId,
+  label: string,
   files: readonly FileContributionReport[],
 ): BusfactorReportSection => {
-  const definition = DEFAULT_REPORT_SECTIONS.find(
-    (section) => section.id === id,
-  );
   return {
     id,
-    label: definition?.label ?? id,
+    label,
     totalFiles: files.length,
     riskFiles: files.filter((file) => file.isRisk).length,
     files: [...files],
@@ -248,12 +262,13 @@ export const analyzeGitLog = (
     ...DEFAULT_ANALYSIS_OPTIONS,
     ...analysisOptions,
   };
+  const categories = analysisOptions.categories ?? DEFAULT_FILE_CATEGORIES;
   const commits = parseGitLog(text);
   const authors = uniqueSortedAuthors(commits);
   const weeks = uniqueWeeksInEncounterOrder(commits);
-  const files = collectTrackedFilePaths(commits);
+  const categorizedFiles = collectCategorizedFilePaths(commits, categories);
   const latestTimestamp = commits[0]?.timestamp ?? 0;
-  const history = initializeFileHistory(files, authors);
+  const histories = initializeCategorizedHistories(categorizedFiles, authors);
 
   for (const commit of commits) {
     const commitWeight = decay(
@@ -262,10 +277,17 @@ export const analyzeGitLog = (
       options.halfLifeDays,
     );
     for (const change of commit.changedFiles) {
-      if (!isLegacyTrackedChange(change.status, change.path)) {
+      const classified = classifyFileChange(
+        change.status,
+        change.path,
+        categories,
+      );
+      if (classified === null) {
         continue;
       }
-      const authorHistory = history.get(change.path);
+      const authorHistory = histories
+        .get(classified.category.id)
+        ?.get(classified.path);
       const contributorStats = authorHistory?.get(commit.author);
       if (contributorStats === undefined) {
         continue;
@@ -279,12 +301,40 @@ export const analyzeGitLog = (
     }
   }
 
-  const legacyFiles = buildFileReports(history, authors, options);
+  const filesByCategory = new Map<string, FileContributionReport[]>();
+  for (const category of categories) {
+    const history = histories.get(category.id) ?? new Map();
+    filesByCategory.set(
+      category.id,
+      buildFileReports(history, authors, options, categorizedFiles.fileOrder),
+    );
+  }
+
+  const overallFiles = sortFileReports(
+    categories.flatMap((category) =>
+      category.includeInOverall === false
+        ? []
+        : (filesByCategory.get(category.id) ?? []),
+    ),
+    categorizedFiles.fileOrder,
+  );
+
+  const overallDefinition = DEFAULT_REPORT_SECTIONS.find(
+    (section) => section.id === "overall",
+  );
   const sections = [
-    buildSection("overall", legacyFiles),
-    buildSection("ts-js-css", legacyFiles),
-    buildSection("python", []),
-    buildSection("markdown", []),
+    buildSection(
+      "overall",
+      overallDefinition?.label ?? "Overall",
+      overallFiles,
+    ),
+    ...categories.map((category) =>
+      buildSection(
+        category.id,
+        category.label,
+        filesByCategory.get(category.id) ?? [],
+      ),
+    ),
   ];
   const overall = sections[0];
 

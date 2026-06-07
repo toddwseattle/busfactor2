@@ -51,8 +51,9 @@ moving the legacy analyzer behavior into `bus-lib`. Keep this milestone focused
 on compatibility with `legacy/criesbeck-browser-app/app.js`; category expansion
 can follow once the old behavior is covered by tests.
 
-Status: BL-M1-0 through BL-M1-3 are implemented for the first CLI legacy
-functionality slice. BL-M1-4 remains follow-up category expansion.
+Status: BL-M1-0 through BL-M1-4 are implemented. BL-M1-4 adds pluggable default
+source categories and Markdown scanning while preserving the `analyzeGitLog`
+interface consumed by the CLI.
 
 ### BL-M1-0 — Add legacy git log fixtures
 
@@ -157,6 +158,8 @@ the CLI can format.
 - CLI can import only from the `bus-lib` package root.
 
 ### BL-M1-4 — Add source categories and overall rollup
+
+Status: implemented.
 
 **Goal:** Support `ts-js-css`, `python`, `markdown`, and derived `overall` after
 old-app parity is tested.

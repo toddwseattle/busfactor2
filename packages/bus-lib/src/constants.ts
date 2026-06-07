@@ -1,7 +1,7 @@
 import type {
   BusfactorAnalysisOptions,
+  DefaultReportSectionId,
   ReportSectionDefinition,
-  ReportSectionId,
 } from "./types.js";
 
 export const REPORT_SCHEMA_VERSION = "busfactor.report.v1";
@@ -11,7 +11,7 @@ export const DEFAULT_SECTION_IDS = [
   "ts-js-css",
   "python",
   "markdown",
-] as const satisfies readonly ReportSectionId[];
+] as const satisfies readonly DefaultReportSectionId[];
 
 export const DEFAULT_REPORT_SECTIONS = [
   { id: "overall", label: "Overall" },

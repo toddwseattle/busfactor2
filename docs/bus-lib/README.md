@@ -66,6 +66,7 @@ Current public exports include:
 - `analyzeGitLog(text, options?)`
 - `parseGitLog(text)`
 - `createEmptyReport()`
+- `DEFAULT_FILE_CATEGORIES`
 - `DEFAULT_ANALYSIS_OPTIONS`
 - `DEFAULT_REPORT_SECTIONS`
 - `DEFAULT_SECTION_IDS`
@@ -99,13 +100,22 @@ uses `weightedActivity` and `totalWeightedActivity` in public types, and keeps
 separate file matcher.
 
 The first CLI legacy slice maps the old browser app's tracked extensions
-(`.js`, `.jsx`, `.ts`, `.tsx`, `.css`, `.html`, `.htm`, and `.yml`) into the
-`ts-js-css` section for compatibility. `python` and `markdown` are present but
-empty until category expansion work follows. HTML and YAML in `ts-js-css` are a
-compatibility bridge, not the final category model.
+(`.js`, `.jsx`, `.ts`, `.tsx`, `.css`, `.html`, `.htm`, and `.yml`) into one
+legacy-compatible file set. Category expansion now uses explicit default source
+categories:
 
-The fixture for this behavior is
-`packages/bus-lib/test/fixtures/legacy-git-log.txt`.
+| Category    | Extensions                           |
+| ----------- | ------------------------------------ |
+| `ts-js-css` | `.ts`, `.tsx`, `.js`, `.jsx`, `.css` |
+| `python`    | `.py`, `.pyi`                        |
+| `markdown`  | `.md`, `.mdx`, `.markdown`           |
+
+HTML and YAML were a first-slice compatibility bridge and are not part of the
+default `ts-js-css` category after category expansion.
+
+Fixtures for these behaviors are
+`packages/bus-lib/test/fixtures/legacy-git-log.txt` and
+`packages/bus-lib/test/fixtures/category-git-log.txt`.
 
 ## Legacy Compatibility Notes
 

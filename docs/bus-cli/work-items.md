@@ -158,3 +158,55 @@ Status: implemented.
 - `npm --workspace bus-cli run dev -- analyze --input <fixture> --agent` emits
   deterministic JSON.
 - Workspace build, test, typecheck, and existing smoke commands pass.
+
+## Milestone 2
+
+Milestone 2 starts category expansion from the CLI side while keeping parsing,
+classification, scoring, and report construction in `bus-lib`.
+
+### CLI-M2-0 — Consume pluggable category reports from `bus-lib`
+
+Status: implemented for default Markdown support.
+
+**Goal:** Make CLI human and agent output compatible with the pluggable
+`bus-lib` category architecture without adding CLI-owned filetype rules.
+
+**Required change:**
+
+- Keep `runAnalyze` calling `analyzeGitLog(input.text, { source })`.
+- Do not add Markdown extension matching to `bus-cli`.
+- Let human output render populated `markdown` sections by iterating
+  `report.sections`.
+- Let `--agent` JSON include populated `markdown` and derived `overall`
+  sections from `bus-lib`.
+- Update CLI tests to assert Markdown rows appear when the library fixture
+  includes Markdown changes.
+
+**Acceptance:**
+
+- `busfactor analyze --input <fixture>` includes a `Markdown` section when the
+  analyzed report contains Markdown rows.
+- `busfactor analyze --input <fixture> --agent` emits JSON with a populated
+  `markdown` section.
+- CLI command options remain unchanged for the first Markdown support slice.
+
+### CLI-M2-1 — Add category selection options
+
+Status: planned.
+
+**Goal:** Let users select source categories without duplicating category
+definitions in CLI code.
+
+**Required change:**
+
+- Add a `--categories <list>` option only after the public `bus-lib` category
+  option contract is stable.
+- Validate category names against public `bus-lib` definitions or a public
+  category helper.
+- Pass selected category definitions to `analyzeGitLog`.
+- Keep `overall` derived from selected categories.
+
+**Acceptance:**
+
+- CLI tests prove selected categories affect report sections and `overall`.
+- Unknown category names fail clearly before analysis.

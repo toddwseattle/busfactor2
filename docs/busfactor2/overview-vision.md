@@ -56,10 +56,13 @@ The original browser-only implementation is preserved in
 - `gitstats.js`, `bus-factor.js`, and `upload.js` define Vue components.
 - `app.css` contains minimal styling.
 
-The current shared analyzer tracks legacy-compatible file edits matching:
+The shared analyzer now classifies file edits through pluggable default source
+categories:
 
 ```text
-js, jsx, ts, tsx, css, html, htm, yml
+ts, tsx, js, jsx, css
+py, pyi
+md, mdx, markdown
 ```
 
 It ignores paths containing:
@@ -75,8 +78,10 @@ the file's total frequency weighted by recency. The legacy code calls this value
 
 The first CLI legacy functionality slice is complete. `bus-cli analyze` now uses
 the public `bus-lib` package export to analyze prepared git log text or a local
-repository path. The current follow-up work is source category expansion,
-additional CLI output/options, and web app migration from smoke UI to real
+repository path. Source category expansion has started in `bus-lib`, so CLI
+human and JSON output can show populated Markdown and Python sections without
+duplicating category rules in `bus-cli`. The current follow-up work is
+additional CLI output/options and web app migration from smoke UI to real
 upload/report rendering.
 
 ## Repository Direction
@@ -236,12 +241,11 @@ __pycache__/
 
 Markdown files should be reported separately from source code because they usually represent docs ownership, not runtime ownership. Python files should be separate because a repository may have both TypeScript/JavaScript/CSS and Python service or automation code, and combining them can hide ownership risk. The overall section should still make the aggregate risk picture easy to scan.
 
-The current implementation preserves legacy tracking first: `.js`, `.jsx`,
-`.ts`, `.tsx`, `.css`, `.html`, `.htm`, and `.yml` are mapped to `ts-js-css`.
-Python and Markdown sections are emitted but empty until category expansion
-lands. The library should support custom categories later, but the first
-Busfactor2 visible sections remain `overall`, `ts-js-css`, `python`, and
-`markdown`.
+The current implementation uses pluggable default source categories for
+TS/JS/CSS, Python, and Markdown. The earlier HTML/YAML mapping into `ts-js-css`
+was a compatibility bridge for the first CLI slice; those extensions are not in
+the clean default category set. The first Busfactor2 visible sections remain
+`overall`, `ts-js-css`, `python`, and `markdown`.
 
 ## Git Log Input Strategy
 
@@ -732,9 +736,11 @@ Exit criteria:
 ### Milestone 2: Source Category Expansion
 
 - Expand from legacy compatibility tracking to explicit TS/JS/CSS, Python, and
-  Markdown source categories.
+  Markdown source categories. Implemented in `bus-lib` with pluggable category
+  definitions.
 - Produce separate `SectionReport` entries plus a derived overall section.
-- Add source category and overall rollup tests.
+  Implemented for default categories.
+- Add source category and overall rollup tests. Implemented for `bus-lib`.
 
 Exit criteria:
 
