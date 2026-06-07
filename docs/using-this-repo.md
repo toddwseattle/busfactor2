@@ -10,7 +10,8 @@ Humans should read:
 
 1. [README](../README.md)
 2. [Vision](busfactor2/overview-vision.md)
-3. [Milestone 0 plan](milestone-0/README.md)
+3. [CLI legacy functionality plan](busfactor2/cli-legacy-functionality-plan.md)
+4. [Milestone 0 completion record](milestone-0/README.md)
 
 Agents should start from:
 
@@ -39,6 +40,11 @@ Package docs:
 - `docs/bus-lib/README.md`
 - `docs/bus-cli/README.md`
 - `docs/bus-web/README.md`
+
+Current implementation plan:
+
+- `docs/busfactor2/cli-legacy-functionality-plan.md`
+- `docs/busfactor2/start-cli-legacy-agent-prompt.md`
 
 ## How To Assign Work To An Agent
 

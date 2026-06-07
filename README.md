@@ -15,13 +15,13 @@ The new project target is:
 toddwseattle/busfactor2
 ```
 
-This repository is currently in Milestone 0 setup. The original static app
-implementation is preserved under `legacy/criesbeck-browser-app`, while the
-root now contains the TypeScript npm workspace foundation.
+Milestone 0 is complete. The original static app implementation is preserved
+under `legacy/criesbeck-browser-app`, while the root contains the TypeScript npm
+workspace foundation.
 
 ## Packages
 
-Busfactor2 is an npm workspace with three smoke packages:
+Busfactor2 is an npm workspace with three packages:
 
 - `bus-lib`: shared TypeScript library foundation for report constants, public
   types, and deterministic smoke report objects.
@@ -46,7 +46,8 @@ matched independently, which avoids double-counting.
 Start here:
 
 - [Vision](docs/busfactor2/overview-vision.md)
-- [Milestone 0 plan](docs/milestone-0/README.md)
+- [CLI legacy functionality plan](docs/busfactor2/cli-legacy-functionality-plan.md)
+- [Milestone 0 completion record](docs/milestone-0/README.md)
 - [Using this repo with agents](docs/using-this-repo.md)
 - [bus-lib docs](docs/bus-lib/README.md)
 - [bus-cli docs](docs/bus-cli/README.md)
@@ -58,23 +59,31 @@ Agent instructions:
 - [AGENTS.md](AGENTS.md)
 - [CLAUDE.md](CLAUDE.md)
 
-## Milestone 0 Goal
+## Current Status
 
-Milestone 0 creates an agent-ready foundation:
+Milestone 0 is complete:
 
-- current top-level documentation
-- Copilot, Codex, and Claude routing files
-- package-specific docs and work items
-- npm workspace scaffold
-- smoke versions of `bus-lib`, `bus-cli`, and `bus-web`
-- Vitest in all packages
-- Husky + lint-staged git hooks for fast local checks
-- preserved copy of the original static browser app under `legacy/`
-- new repository remote for `toddwseattle/busfactor2`
+- current top-level documentation exists
+- Copilot, Codex, and Claude routing files exist
+- package-specific docs and work items exist
+- npm workspace scaffold exists
+- smoke versions of `bus-lib`, `bus-cli`, and `bus-web` build and test
+- Vitest runs in all packages
+- Husky + lint-staged git hooks are installed
+- the original static browser app is preserved under `legacy/`
+- the new repository remote is `toddwseattle/busfactor2`
+- branch `codex-milestone-0` is pushed to the new repository
+
+The next implementation focus is CLI parity with the old browser app:
+
+- port legacy parsing, weekly commits, frecency scoring, and bus factor risk
+  logic into `bus-lib`
+- wire `bus-cli analyze` to input files, stdin, or a local repo
+- emit deterministic JSON for agents and compact human output for terminals
 
 ## Workspace Commands
 
-Use these commands for Milestone 0 verification:
+Use these commands for current workspace verification:
 
 ```bash
 npm install

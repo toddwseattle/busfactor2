@@ -1,5 +1,14 @@
 # Milestone 0 Work Items
 
+Status: complete. Milestone 0 was implemented and pushed on branch
+`codex-milestone-0` to
+[`toddwseattle/busfactor2`](https://github.com/toddwseattle/busfactor2).
+
+Next work is tracked in
+[CLI legacy functionality plan](../busfactor2/cli-legacy-functionality-plan.md),
+[bus-lib work items](../bus-lib/work-items.md), and
+[bus-cli work items](../bus-cli/work-items.md).
+
 Items are grouped by workstream. Complete them in order unless a later item is
 explicitly independent.
 

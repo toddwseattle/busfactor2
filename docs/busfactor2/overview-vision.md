@@ -39,13 +39,22 @@ The CLI should be explicit, repeatable, and parseable. An LLM should be able to 
 
 ## Current State
 
-The existing repository is a static browser app:
+Milestone 0 is complete. The repository is now a TypeScript npm workspace with
+three smoke packages:
+
+- `packages/bus-lib`: exports public report constants, section IDs, report
+  types, and `createEmptyReport`.
+- `packages/bus-cli`: exposes yargs help and a smoke `analyze --agent` JSON
+  path.
+- `packages/bus-web`: builds a React + Vite smoke UI that imports `bus-lib`.
+
+The original browser-only implementation is preserved in
+`legacy/criesbeck-browser-app` for migration reference:
 
 - `index.html` loads Vue 3 from a CDN.
 - `app.js` contains parsing, filtering, scoring, date bucketing, and file upload helpers.
 - `gitstats.js`, `bus-factor.js`, and `upload.js` define Vue components.
 - `app.css` contains minimal styling.
-- There is no `package.json`, build step, TypeScript config, test runner, or CLI.
 
 The current analyzer tracks file edits matching:
 
@@ -61,20 +70,30 @@ node_modules, build, dist
 
 It uses a 7-day half-life decay model to compute file activity, then marks contributors as active when their decayed contribution is at least 5 percent of the file's total frecency.
 
+The next implementation slice is CLI parity with the old browser app. The
+current execution plan is
+[CLI legacy functionality plan](cli-legacy-functionality-plan.md), with
+package-level work items in [bus-lib work items](../bus-lib/work-items.md) and
+[bus-cli work items](../bus-cli/work-items.md). A ready-to-run starter prompt
+for a new agent lives in
+[start CLI legacy agent prompt](start-cli-legacy-agent-prompt.md).
+
 ## Repository Direction
 
-The working branch can be developed locally from the existing `criesbeck/busfactor` clone, but the new project should be published as:
+The working branch was developed locally from the existing
+`criesbeck/busfactor` clone, but the new project is published as:
 
 ```text
 toddwseattle/busfactor2
 ```
 
-Recommended GitHub transition:
+Current Git remotes:
 
-1. Create a new empty `toddwseattle/busfactor2` repository.
-2. Update `origin` or add a new remote such as `busfactor2`.
-3. Keep original attribution in the README and package metadata.
-4. Avoid opening pull requests against `criesbeck/busfactor`.
+- `origin`: `https://github.com/toddwseattle/busfactor2.git`
+- `upstream`: `https://github.com/criesbeck/busfactor.git`
+
+Keep original attribution in the README and package metadata. Avoid opening pull
+requests against `criesbeck/busfactor`.
 
 ## Target Monorepo Layout
 
@@ -654,6 +673,8 @@ Initial docs:
 
 ### Milestone 0: Agent-Ready Smoke Workspace And Repo Cutover
 
+Status: complete.
+
 - Add Copilot, Codex, and Claude agent files.
 - Replace the top-level README with current Busfactor2 guidance.
 - Add `docs/using-this-repo.md` for humans coordinating work with agents.
@@ -675,7 +696,26 @@ Exit criteria:
 - legacy static app files are available for migration reference.
 - no work is pushed back to `criesbeck/busfactor`.
 
-### Milestone 1: Workspace Hardening And Public Contracts
+### Milestone 1: CLI Legacy Functionality
+
+Port enough of the old browser app into `bus-lib` and `bus-cli` for the CLI to
+analyze existing `git log --no-merges --name-status main` output.
+
+Reference plan:
+[CLI legacy functionality plan](cli-legacy-functionality-plan.md).
+
+Exit criteria:
+
+- `bus-lib` parses fixture git logs compatible with the old browser app.
+- `bus-lib` computes weekly commit stats, file contribution percentages, active
+  contributor counts, and risk flags with legacy defaults.
+- `bus-cli analyze --input <file> --agent` emits deterministic JSON using the
+  real analyzer.
+- `bus-cli analyze --input <file>` prints readable human output with weekly
+  commits and bus factor tables.
+- package and workspace build, test, typecheck, and CLI smoke commands pass.
+
+### Milestone 2: Workspace Hardening And Public Contracts
 
 - Replace smoke-only exports with initial real public types and package boundaries.
 - Confirm workspace scripts, TypeScript references, Vitest configs, and package exports are stable.
@@ -688,17 +728,7 @@ Exit criteria:
 - test fixtures exist for legacy git log inputs.
 - package docs match implemented package boundaries.
 
-### Milestone 2: Shared Analyzer
-
-- Port parser and scoring logic from `app.js` to `bus-lib`.
-- Preserve current behavior with tests.
-- Expose typed report model.
-
-Exit criteria:
-
-- fixture reports match expected authors, weeks, files, and active contributor counts.
-
-### Milestone 3: File Category Expansion
+### Milestone 3: Source Category Expansion
 
 - Add TS/JS/CSS, Python, and Markdown source categories.
 - Produce separate `SectionReport` entries plus a derived overall section.
@@ -706,19 +736,22 @@ Exit criteria:
 
 Exit criteria:
 
-- one fixture produces four bus factor sections: overall, TS/JS/CSS, Python, and Markdown.
+- one fixture produces four bus factor sections: overall, TS/JS/CSS, Python, and
+  Markdown.
 
-### Milestone 4: CLI
+### Milestone 4: CLI Expansion
 
-- Add yargs command structure.
-- Implement `busfactor analyze`.
-- Support `--repo`, `--input`, `--stdin`, `--format`, `--agent`, `--output`, and threshold options.
+- Expand `busfactor analyze` beyond old-app parity.
+- Support `--repo`, `--stdin`, `--format markdown`, `--output`, threshold
+  options, `--top`, and `--fail-on-risk`.
 - Add CLI tests around argument parsing and formatter output.
 
 Exit criteria:
 
-- `busfactor analyze --input fixture.log --format human` prints readable tables.
-- `busfactor analyze --input fixture.log --agent` prints valid JSON.
+- `busfactor analyze --repo . --format markdown --output busfactor.md` writes a
+  deterministic report.
+- `busfactor analyze --repo . --agent --fail-on-risk` exits according to risk
+  policy.
 
 ### Milestone 5: Web Migration
 

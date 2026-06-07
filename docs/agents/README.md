@@ -26,6 +26,8 @@ Package docs:
 Milestone sequencing:
 
 - `docs/using-this-repo.md`
+- `docs/busfactor2/cli-legacy-functionality-plan.md`
+- `docs/busfactor2/start-cli-legacy-agent-prompt.md`
 - `docs/milestone-0/README.md`
 - `docs/milestone-0/work-items.md`
 - `docs/milestone-0/smoke-package-contracts.md`
@@ -43,8 +45,12 @@ Use the smallest relevant context:
   `.github/agents/bus-cli-yargs.md`.
 - Changing React UI behavior: read `docs/bus-web` and
   `.github/agents/bus-web-react.md`.
-- Changing repo shape, package scaffolding, or migration order: read
-  `docs/milestone-0`.
+- Starting the next CLI parity slice: read
+  `docs/busfactor2/cli-legacy-functionality-plan.md`,
+  `docs/busfactor2/start-cli-legacy-agent-prompt.md`, `docs/bus-lib`, and
+  `docs/bus-cli`.
+- Changing repo shape, package scaffolding, or migration order after Milestone 0:
+  read `docs/busfactor2/overview-vision.md` and current package work items.
 
 Do not copy or import design docs from other projects. Start new Busfactor2 web
 design work from `docs/bus-web/web-design-template.md`.

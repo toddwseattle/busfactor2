@@ -1,5 +1,11 @@
 # Milestone 0 Plan
 
+Status: complete.
+
+Milestone 0 was implemented and pushed on branch `codex-milestone-0` to
+[`toddwseattle/busfactor2`](https://github.com/toddwseattle/busfactor2). The
+original repository remains available as the `upstream` remote.
+
 Milestone 0 creates an agent-ready Busfactor2 foundation before the real analyzer
 migration begins.
 
@@ -9,9 +15,9 @@ smoke packages, legacy-source preservation, and the new GitHub repository target
 
 ## Outcomes
 
-Milestone 0 is complete when:
+Milestone 0 is complete. The repository now has:
 
-- the repository has Copilot, Codex, and Claude agent instructions
+- Copilot, Codex, and Claude agent instructions
 - the top-level README is current for Busfactor2
 - humans have a guide for using the repo with agents
 - package docs exist for `bus-lib`, `bus-cli`, and `bus-web`
@@ -106,7 +112,7 @@ original static app files so agents can migrate from a stable source while the
 new package structure evolves. Root static app files are removed after the copy
 so the repository root represents the new workspace direction.
 
-## Workstreams
+## Completed Workstreams
 
 1. Documentation and agent scaffolding.
 2. Repository cutover to `toddwseattle/busfactor2`.
@@ -116,11 +122,13 @@ so the repository root represents the new workspace direction.
 6. Legacy source preservation.
 7. Verification and push.
 
-Detailed work items are in [work-items.md](work-items.md).
+Detailed work items are in [work-items.md](work-items.md). Next implementation
+planning continues in
+[CLI legacy functionality plan](../busfactor2/cli-legacy-functionality-plan.md).
 
 ## Milestone 0 Verification
 
-Run these checks before marking Milestone 0 complete:
+These checks passed before the branch was pushed:
 
 ```bash
 npm install
@@ -134,7 +142,7 @@ npm --workspace bus-web run build
 npm run lint-staged
 ```
 
-Also confirm:
+Confirmed:
 
 - `git remote -v` shows the new Busfactor2 remote.
 - the branch is pushed to `toddwseattle/busfactor2`.
@@ -145,9 +153,8 @@ Also confirm:
 
 ## Dependencies And Decisions
 
-- Repository visibility for `toddwseattle/busfactor2` should be confirmed before
-  creation. Default recommendation: public, to match the original GitHub Pages
-  app, unless private development is preferred.
+- Repository visibility for `toddwseattle/busfactor2` is public, matching the
+  original GitHub Pages app.
 - Use npm workspaces rather than pnpm or yarn unless the project direction
   changes.
 - Use Vitest in every package.
