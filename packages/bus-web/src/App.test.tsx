@@ -261,8 +261,21 @@ describe("App", () => {
 
     uploadGitLog(gitLogSample);
 
+    const overallButton = await screen.findByRole("button", {
+      name: /Overall/,
+    });
+    const tsJsCssButton = screen.getByRole("button", { name: /TS\/JS\/CSS/ });
+    const pythonButton = screen.getByRole("button", { name: /Python/ });
+    const markdownButton = screen.getByRole("button", { name: /Markdown/ });
+
+    expect(overallButton).toHaveAttribute("aria-expanded", "true");
+    expect(tsJsCssButton).toHaveAttribute("aria-expanded", "false");
+    expect(pythonButton).toHaveAttribute("aria-expanded", "false");
+    expect(markdownButton).toHaveAttribute("aria-expanded", "false");
+    expect(overallButton).toHaveAttribute("aria-controls");
+
     expect(
-      await screen.findByRole("heading", { level: 2, name: "Overall" }),
+      screen.getByRole("heading", { level: 2, name: "Overall" }),
     ).toBeInTheDocument();
 
     const overallTable = screen.getByRole("table", {
@@ -304,8 +317,27 @@ describe("App", () => {
     ).toBeGreaterThan(0);
 
     expect(
+      screen.queryByRole("table", { name: "Bus factor by file for TS/JS/CSS" }),
+    ).not.toBeInTheDocument();
+
+    fireEvent.click(tsJsCssButton);
+
+    expect(overallButton).toHaveAttribute("aria-expanded", "false");
+    expect(tsJsCssButton).toHaveAttribute("aria-expanded", "true");
+    expect(
       screen.getByRole("table", { name: "Bus factor by file for TS/JS/CSS" }),
     ).toBeInTheDocument();
+
+    fireEvent.click(tsJsCssButton);
+
+    expect(tsJsCssButton).toHaveAttribute("aria-expanded", "false");
+    expect(
+      screen.queryByRole("table", { name: "Bus factor by file for TS/JS/CSS" }),
+    ).not.toBeInTheDocument();
+
+    fireEvent.click(pythonButton);
+
+    expect(pythonButton).toHaveAttribute("aria-expanded", "true");
     expect(
       screen.getByRole("heading", { level: 2, name: "Python" }),
     ).toBeInTheDocument();
