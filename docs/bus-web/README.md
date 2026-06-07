@@ -83,8 +83,13 @@ Start design work from `docs/bus-web/web-design-template.md`.
 Do not copy a `DESIGN.md` from another project. The template is intentionally
 blank enough to let Busfactor2 define its own visual system.
 
+The proposed dashboard visual treatment and implementation sequencing live in
+`docs/bus-web/new-design.md`. Treat `docs/bus-web/stitch-ui/` as prototype
+source material, not implementation source.
+
 ## Agent Entry Points
 
 - Agent prompt: `.github/agents/bus-web-react.md`
 - Work items: `docs/bus-web/work-items.md`
 - Design template: `docs/bus-web/web-design-template.md`
+- New design plan: `docs/bus-web/new-design.md`

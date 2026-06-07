@@ -35,10 +35,12 @@ Use this agent when changing `packages/bus-web`, including:
 
 1. Read `docs/bus-web/README.md`.
 2. Read `docs/bus-web/web-design-template.md` before adding visual patterns.
-3. Confirm the needed report data exists in `bus-lib`.
-4. Add or update React Testing Library tests near the component.
-5. Keep components focused and named exports explicit.
-6. Update docs when adding a user-facing workflow.
+3. Read `docs/bus-web/new-design.md` when implementing the proposed dashboard
+   visual treatment.
+4. Confirm the needed report data exists in `bus-lib`.
+5. Add or update React Testing Library tests near the component.
+6. Keep components focused and named exports explicit.
+7. Update docs when adding a user-facing workflow.
 
 ## Testing Expectations
 
