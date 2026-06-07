@@ -52,17 +52,20 @@ packages/bus-web/
 
 ## Current UI Shape
 
-The current web package renders smoke content only:
+The current web package renders the first raw legacy-functionality slice:
 
-- app title
-- upload placeholder
-- section navigation placeholders
-- visible section labels for Overall, TS/JS/CSS, Python, and Markdown
-- proof that the app can import a public value from `bus-lib`
+- app title and upload-first instructions
+- labelled file upload for prepared git log text
+- browser file reading and `bus-lib` analysis
+- summary counts for authors, weeks, tracked files, and risk files
+- weekly commit counts by author
+- bus factor sections for Overall, TS/JS/CSS, Python, and Markdown
+- empty and invalid upload messages
 
-`bus-lib` now exposes the analyzer. The next web work is replacing the smoke UI
-with real upload, analysis, report rendering, empty/loading/error states, and
-tests that consume `bus-lib` report output.
+The UI is intentionally unstyled beyond semantic browser defaults. The next web
+work is source category expansion as `bus-lib` adds Python and Markdown file
+classification, followed by real visual design from the Busfactor2 design
+template.
 
 ## Testing
 

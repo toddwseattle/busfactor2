@@ -39,7 +39,12 @@ documentation without copying another project's `DESIGN.md`.
 
 ## Milestone 1
 
+Implementation plan: `docs/bus-web/legacy-functionality-plan.md`
+
 ### WEB-M1-1 — Rebuild upload flow
+
+**Status:** Implemented in `packages/bus-web/src/App.tsx` and
+`packages/bus-web/src/components/UploadPanel.tsx`.
 
 **Goal:** Replace smoke UI with a real upload flow using `bus-lib`.
 
@@ -49,6 +54,9 @@ documentation without copying another project's `DESIGN.md`.
 - Empty and malformed files show clear errors.
 
 ### WEB-M1-2 — Render report sections
+
+**Status:** Implemented with raw semantic tables in
+`packages/bus-web/src/components`.
 
 **Goal:** Show weekly commits and bus factor sections.
 
