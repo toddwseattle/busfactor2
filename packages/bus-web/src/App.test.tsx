@@ -154,6 +154,108 @@ describe("App", () => {
     expect(within(chart).queryByText(/\bLOC\b/i)).not.toBeInTheDocument();
   });
 
+  it("uploads a deterministic git log and renders weekly commit activity", async () => {
+    render(<App />);
+
+    uploadGitLog(gitLogSample);
+
+    expect(
+      await screen.findByRole("heading", { name: "Weekly commits" }),
+    ).toBeInTheDocument();
+
+    const table = screen.getByRole("table", {
+      name: "Weekly commits by author and report week",
+    });
+
+    expect(
+      within(table).getByRole("columnheader", { name: "Author" }),
+    ).toBeInTheDocument();
+    expect(
+      within(table).getByRole("columnheader", { name: "Total" }),
+    ).toBeInTheDocument();
+    expect(
+      within(table).getByRole("columnheader", { name: "2024-02-04" }),
+    ).toBeInTheDocument();
+    expect(
+      within(table).getByRole("columnheader", { name: "2024-01-28" }),
+    ).toBeInTheDocument();
+
+    expect(
+      within(table).getByRole("rowheader", { name: "Alice Example" }),
+    ).toBeInTheDocument();
+    expect(
+      within(table).getByRole("rowheader", { name: "Bob Example" }),
+    ).toBeInTheDocument();
+    expect(
+      within(table).getByRole("rowheader", { name: "Cara Example" }),
+    ).toBeInTheDocument();
+
+    expect(
+      within(
+        within(table).getByRole("cell", {
+          name: "Alice Example total commits: 2 commits",
+        }),
+      ).getByText("2"),
+    ).toBeVisible();
+    expect(
+      within(
+        within(table).getByRole("cell", {
+          name: "Bob Example total commits: 1 commit",
+        }),
+      ).getByText("1"),
+    ).toBeVisible();
+    expect(
+      within(
+        within(table).getByRole("cell", {
+          name: "Cara Example total commits: 1 commit",
+        }),
+      ).getByText("1"),
+    ).toBeVisible();
+
+    expect(
+      within(
+        within(table).getByRole("cell", {
+          name: "Alice Example, week 2024-02-04: 1 commit",
+        }),
+      ).getByText("1"),
+    ).toBeVisible();
+    expect(
+      within(
+        within(table).getByRole("cell", {
+          name: "Alice Example, week 2024-01-28: 1 commit",
+        }),
+      ).getByText("1"),
+    ).toBeVisible();
+    expect(
+      within(
+        within(table).getByRole("cell", {
+          name: "Bob Example, week 2024-02-04: 1 commit",
+        }),
+      ).getByText("1"),
+    ).toBeVisible();
+    expect(
+      within(
+        within(table).getByRole("cell", {
+          name: "Bob Example, week 2024-01-28: 0 commits",
+        }),
+      ).getByText("0"),
+    ).toBeVisible();
+    expect(
+      within(
+        within(table).getByRole("cell", {
+          name: "Cara Example, week 2024-02-04: 1 commit",
+        }),
+      ).getByText("1"),
+    ).toBeVisible();
+    expect(
+      within(
+        within(table).getByRole("cell", {
+          name: "Cara Example, week 2024-01-28: 0 commits",
+        }),
+      ).getByText("0"),
+    ).toBeVisible();
+  });
+
   it("keeps report section labels visible with high-risk status only", async () => {
     render(<App />);
 

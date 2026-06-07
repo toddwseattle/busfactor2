@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { analyzeGitLog } from "bus-lib";
 import type { BusfactorReport } from "bus-lib";
+import { CommitStatsTable } from "./components/CommitStatsTable.js";
 import { ReportSectionPlaceholders } from "./components/ReportSectionPlaceholders.js";
 import { ReportSummary } from "./components/ReportSummary.js";
 import { SectionDistributionChart } from "./components/SectionDistributionChart.js";
@@ -209,6 +210,10 @@ export const App = () => {
             <SectionDistributionChart
               sections={state.report.sections}
               totalFiles={state.report.summary.totalFiles}
+            />
+            <CommitStatsTable
+              commitStats={state.report.commitStats}
+              weeks={state.report.weeks}
             />
             <ReportSectionPlaceholders sections={state.report.sections} />
           </>
