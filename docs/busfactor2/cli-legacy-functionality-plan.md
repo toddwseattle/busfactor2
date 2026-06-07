@@ -18,8 +18,10 @@ Reference docs:
 In scope for the first CLI parity slice:
 
 - parse existing `git log --no-merges --name-status main` text
-- preserve legacy author, date, weekly commit, file edit, frecency, active
-  contributor, and risk calculations
+- preserve legacy author, date, weekly commit, file edit, frequency weighted by
+  recency, active contributor, and risk calculations
+- support `busfactor --help` and `busfactor --version`
+- support `busfactor analyze [path]` for a local repository path
 - support `busfactor analyze --input <file>`
 - support `busfactor analyze --agent`
 - add enough human output to show weekly commits and bus factor rows
@@ -46,11 +48,19 @@ preserve these behaviors:
 - half-life: 7 days
 - active contributor threshold: 5 percent
 - risk threshold: fewer than 3 active contributors
-- file ordering: highest total frecency first
+- file ordering: highest total frequency weighted by recency first
 
 The Busfactor2 report model should still use current section IDs. If exact
 legacy HTML/YAML handling does not fit cleanly into `ts-js-css`, document it in
 types and tests before changing behavior.
+
+## CLI Surface Planning Gate
+
+Before broadening the CLI beyond old-app parity, propose the command structure
+and option set to the user and capture the decision in a related plan. That
+proposal should include common commands and flags such as `--help` and
+`--version`, and it should keep local path analysis as the first supported
+workflow.
 
 ## Implementation Order
 
@@ -58,14 +68,15 @@ types and tests before changing behavior.
    behavior.
 2. Port pure parser helpers from `legacy/criesbeck-browser-app/app.js` into
    `bus-lib`.
-3. Port weekly commit and frecency scoring into `bus-lib`.
+3. Port weekly commit and frequency-weighted recency scoring into `bus-lib`.
 4. Export `analyzeGitLog(text, options?)` from the `bus-lib` package root.
-5. Expand `bus-cli analyze` option parsing for `--input`, `--stdin`, `--repo`,
-   `--ref`, `--format`, `--agent`, and `--no-color`.
-6. Implement input loaders using Node APIs and safe git argument arrays.
-7. Wire `bus-cli analyze` to `analyzeGitLog`.
-8. Add human and agent formatter tests.
-9. Run full workspace verification.
+5. Add top-level `busfactor --version`.
+6. Expand `bus-cli analyze` option parsing for local path analysis, `--input`,
+   `--stdin`, `--repo`, `--ref`, `--format`, `--agent`, and `--no-color`.
+7. Implement input loaders using Node APIs and safe git argument arrays.
+8. Wire `bus-cli analyze` to `analyzeGitLog`.
+9. Add human and agent formatter tests.
+10. Run full workspace verification.
 
 ## Verification
 
@@ -76,8 +87,10 @@ npm run build --workspaces
 npm run test --workspaces
 npm run typecheck --workspaces
 npm --workspace bus-cli run dev -- --help
+npm --workspace bus-cli run dev -- --version
 npm --workspace bus-cli run dev -- analyze --help
 npm --workspace bus-cli run dev -- analyze --agent
+npm --workspace bus-cli run dev -- analyze . --agent
 npm --workspace bus-cli run dev -- analyze --input packages/bus-lib/test/fixtures/legacy-git-log.txt --agent
 npm run lint-staged
 ```
@@ -90,7 +103,7 @@ commit.
 The slice is complete when:
 
 - `bus-lib` owns parser and scoring behavior.
-- CLI analysis works from a fixture input file.
+- CLI analysis works from a local repo path and a fixture input file.
 - `--agent` returns deterministic JSON from real analysis.
 - human output includes weekly commits and bus factor risk rows.
 - tests cover parser, scoring, input loading, and formatter behavior.

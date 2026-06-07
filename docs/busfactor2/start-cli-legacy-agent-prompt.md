@@ -49,10 +49,14 @@ Required behavior:
   real analysis, not `createEmptyReport`.
 - `busfactor analyze --input <fixture>` prints readable human output with weekly
   commits and bus factor rows.
+- `busfactor --version` prints a version.
+- `busfactor analyze . --agent` can analyze a local repository path.
 - CLI supports `--input`, `--stdin`, `--repo`, `--ref`, `--format <human|json>`,
   `--agent`, and `--no-color` for the first slice.
 - Old defaults are preserved: 7-day half-life, 5 percent active threshold, and
-  fewer than 3 active contributors is risky.
+  fewer than 3 active contributors is risky. The old source calls the weighted
+  activity value `frecency`; use clear naming in new public types and document
+  any compatibility terms.
 
 Run verification:
 
@@ -61,11 +65,13 @@ npm run build --workspaces
 npm run test --workspaces
 npm run typecheck --workspaces
 npm --workspace bus-cli run dev -- --help
+npm --workspace bus-cli run dev -- --version
 npm --workspace bus-cli run dev -- analyze --help
 npm --workspace bus-cli run dev -- analyze --agent
+npm --workspace bus-cli run dev -- analyze . --agent
 npm --workspace bus-cli run dev -- analyze --input packages/bus-lib/test/fixtures/legacy-git-log.txt --agent
 npm run lint-staged
-````
+```
 
 If any check fails, fix it unless the failure is caused by missing external auth
 or an explicit environment blocker.
@@ -78,6 +84,4 @@ Report back with:
 - any compatibility gaps found in the old app behavior
 - branch, commit, and push status if you commit or push
 
-```
-
-```
+````

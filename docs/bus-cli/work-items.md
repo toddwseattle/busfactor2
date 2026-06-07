@@ -38,6 +38,7 @@ yargs command.
 **Required change:**
 
 - Add the `analyze [path]` command.
+- Add top-level `--version`.
 - Define planned options with descriptions.
 - Keep behavior smoke-only until `bus-lib` analysis is ready.
 
@@ -45,6 +46,7 @@ yargs command.
 
 - `busfactor analyze --help` documents input, output, section, threshold, and
   agent options.
+- `busfactor --version` prints the package version.
 
 ## Milestone 1
 
@@ -52,7 +54,7 @@ Milestone 1 gets the CLI working with the old browser app functionality using
 the real analyzer from `bus-lib`. Keep parsing, scoring, and report construction
 out of `bus-cli`.
 
-### CLI-M1-0 — Expand `analyze` options for the first real slice
+### CLI-M1-0 — Expand top-level and `analyze` options for the first real slice
 
 **Files:** `packages/bus-cli/src/commands/analyze.ts`,
 `packages/bus-cli/src/index.ts`
@@ -63,14 +65,17 @@ implementing all future CLI options.
 **Required change:**
 
 - Support `busfactor analyze [path]`.
+- Support `busfactor --version`.
 - Support `--input <file>`, `--stdin`, `--repo <path>`, `--ref <ref>`,
   `--format <human|json>`, `--agent`, and `--no-color`.
 - Default to `--repo .` when no input is provided.
+- Treat a positional path as the first local repository path workflow.
 - Treat `--agent` as JSON output with no prose and no color.
 
 **Acceptance:**
 
 - Help output documents each supported option.
+- Version output is tested.
 - Unit tests cover yargs parsing and defaults.
 
 ### CLI-M1-1 — Implement input loaders
@@ -82,8 +87,8 @@ implementing all future CLI options.
 - Read `--input` files with Node filesystem APIs.
 - Read stdin only when `--stdin` is set.
 - Run git with argument arrays for `--repo` and `--ref`.
-- Use `git log --no-merges --name-status <ref>` for old-app compatibility in
-  the first slice.
+- Use `git log --no-merges --name-status <ref>` for local path and `--repo`
+  compatibility in the first slice.
 - Return clear errors for unreadable files, empty input, missing git, and git
   command failure.
 - Keep input-loading code isolated from formatter and command logic.
@@ -106,6 +111,7 @@ implementing all future CLI options.
 
 **Acceptance:**
 
+- `busfactor analyze . --agent` can analyze a local repo path.
 - `busfactor analyze --input <fixture> --agent` prints valid report JSON.
 - Tests prove the CLI does not import `bus-lib` internals.
 
@@ -134,6 +140,8 @@ implementing all future CLI options.
 **Acceptance:**
 
 - `npm --workspace bus-cli run test` covers `--input` with a fixture log.
+- `npm --workspace bus-cli run test` covers positional local path behavior with
+  mocked git execution.
 - `npm --workspace bus-cli run dev -- analyze --input <fixture> --agent` emits
   deterministic JSON.
 - Workspace build, test, typecheck, and existing smoke commands pass.

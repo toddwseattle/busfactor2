@@ -8,7 +8,7 @@ that must be identical in the CLI and web app.
 - Parse supported git log text.
 - Classify changed files into source categories.
 - Compute weekly commit counts by author.
-- Compute file edit history and frecency scores.
+- Compute file edit history and frequency weighted by recency scores.
 - Detect active contributors and risky files.
 - Build stable, versioned report objects.
 - Derive the `overall` section from selected source categories.
@@ -95,7 +95,7 @@ Minimum coverage:
 - file classification
 - ignore rules
 - weekly commit buckets
-- frecency scoring
+- weighted frequency scoring
 - active contributor detection
 - risk detection
 - overall section rollup

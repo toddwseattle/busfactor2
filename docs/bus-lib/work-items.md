@@ -94,14 +94,16 @@ porting implementation code.
 
 **Acceptance:**
 
-- Fixture tests prove current author, week, file, frecency, and risk behavior.
+- Fixture tests prove current author, week, file, frequency weighted by recency,
+  and risk behavior.
 
-### BL-M1-2 — Port legacy weekly commit and frecency scoring
+### BL-M1-2 — Port legacy weekly commit and weighted frequency scoring
 
 **Legacy source:** `legacy/criesbeck-browser-app/app.js`
 
 **Goal:** Preserve the old weekly commit and bus factor calculations in typed
-library code.
+library code. The legacy source calls the weighted file activity value
+`frecency`; Busfactor2 docs describe it as frequency weighted by recency.
 
 **Required change:**
 
@@ -109,8 +111,8 @@ library code.
 - Preserve the 5 percent active contributor threshold.
 - Preserve the risk threshold of fewer than 3 active contributors.
 - Compute per-author commit counts by week.
-- Compute per-file edit counts, last edit date, frecency, contribution
-  percentages, active contributor counts, and risk flags.
+- Compute per-file edit counts, last edit date, weighted frequency,
+  contribution percentages, active contributor counts, and risk flags.
 - Sort files by total decayed activity descending, matching the old UI intent.
 
 **Acceptance:**

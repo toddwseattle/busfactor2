@@ -68,7 +68,10 @@ It ignores paths containing:
 node_modules, build, dist
 ```
 
-It uses a 7-day half-life decay model to compute file activity, then marks contributors as active when their decayed contribution is at least 5 percent of the file's total frecency.
+It uses a 7-day half-life decay model to compute file activity, then marks
+contributors as active when their decayed contribution is at least 5 percent of
+the file's total frequency weighted by recency. The legacy code calls this value
+`frecency`.
 
 The next implementation slice is CLI parity with the old browser app. The
 current execution plan is
@@ -325,13 +328,13 @@ Each file report should include:
 
 - path
 - total edit count
-- total frecency
+- total weighted frequency
 - active contributor count
 - risk boolean
 - last edited date
 - per-author edit counts
 - per-author last edited date
-- per-author frecency and percentage contribution
+- per-author weighted frequency and percentage contribution
 - per-author active contributor boolean
 
 ## CLI Vision
@@ -515,7 +518,7 @@ Minimum tests:
 - classify files into TS/JS/CSS, Python, and Markdown categories
 - derive the overall section as the sum of selected source categories
 - compute weekly commit buckets
-- compute frecency and contribution percentages
+- compute weighted frequency and contribution percentages
 - detect active contributors by threshold
 - detect risky files by active contributor count
 - produce stable JSON report snapshots

@@ -76,9 +76,9 @@ Milestone 0 is complete:
 
 The next implementation focus is CLI parity with the old browser app:
 
-- port legacy parsing, weekly commits, frecency scoring, and bus factor risk
-  logic into `bus-lib`
-- wire `bus-cli analyze` to input files, stdin, or a local repo
+- port legacy parsing, weekly commits, weighted frequency scoring, and bus
+  factor risk logic into `bus-lib`
+- wire `bus-cli analyze` to a local repo path first, then input files and stdin
 - emit deterministic JSON for agents and compact human output for terminals
 
 ## Workspace Commands
