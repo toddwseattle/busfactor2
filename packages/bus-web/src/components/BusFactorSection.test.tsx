@@ -107,7 +107,13 @@ describe("BusFactorSection", () => {
       screen.getByRole("columnheader", { name: "Status" }),
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("columnheader", { name: "Contributor Activity" }),
+      screen.getByRole("columnheader", { name: "Alice Example" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("columnheader", { name: "Bob Example" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("columnheader", { name: "Cara Example" }),
     ).toBeInTheDocument();
 
     const riskyRow = within(rowForPath("src/risky.ts"));
@@ -138,17 +144,29 @@ describe("BusFactorSection", () => {
     render(<BusFactorSection section={createSection()} />);
 
     const riskyRow = within(rowForPath("src/risky.ts"));
-    expect(riskyRow.getByText("Alice Example")).toBeInTheDocument();
     expect(riskyRow.getByText("100%")).toBeInTheDocument();
     expect(riskyRow.getByText("2 edits")).toBeInTheDocument();
+    expect(
+      riskyRow.getByRole("cell", {
+        name: "src/risky.ts, Alice Example contribution: 100%, 2 edits",
+      }),
+    ).toBeInTheDocument();
 
     const sharedRow = within(rowForPath("src/shared.ts"));
-    expect(sharedRow.getByText("Bob Example")).toBeInTheDocument();
     expect(sharedRow.getByText("66.7%")).toBeInTheDocument();
     expect(sharedRow.getByText("2 edits")).toBeInTheDocument();
-    expect(sharedRow.getByText("Cara Example")).toBeInTheDocument();
     expect(sharedRow.getByText("33.3%")).toBeInTheDocument();
     expect(sharedRow.getByText("1 edit")).toBeInTheDocument();
+    expect(
+      sharedRow.getByRole("cell", {
+        name: "src/shared.ts, Bob Example contribution: 66.7%, 2 edits",
+      }),
+    ).toBeInTheDocument();
+    expect(
+      sharedRow.getByRole("cell", {
+        name: "src/shared.ts, Cara Example contribution: 33.3%, 1 edit",
+      }),
+    ).toBeInTheDocument();
   });
 
   it("renders a clear empty state instead of an empty table", () => {

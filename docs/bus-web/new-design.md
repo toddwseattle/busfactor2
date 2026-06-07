@@ -94,7 +94,7 @@ Prototype adjustments to make in the first pass:
 | `LanguageAccordion`     | `ReportAccordion`                                    | Use sections `overall`, `ts-js-css`, `python`, `markdown`; labels come from `bus-lib`.                          |
 | `LanguageSummaryHeader` | `ReportSectionSummary`                               | `totalEdits` and file share can be derived from section files.                                                  |
 | `FileAnalysisTable`     | `BusFactorSection` or `FileContributionTable`        | Existing docs name `BusFactorSection`; split table only if the component grows.                                 |
-| `FileRow`               | local row component inside table                     | Keep risk label, file path, edits, and contributor cells accessible.                                            |
+| `FileRow`               | local row component inside table                     | Keep risk label, file path, edits, and one contribution cell per contributor accessible.                        |
 | `StatusBadge`           | `StatusBadge`                                        | First pass only renders `High Risk` from `isRisk`.                                                              |
 | `Button`                | `Button` only if repeated                            | Avoid a shared component until multiple button variants exist.                                                  |
 | `Icon`                  | defer                                                | Choose a local icon strategy before introducing an icon dependency.                                             |
@@ -301,8 +301,9 @@ Acceptance:
 
 ### 8. Implement File-Level Analysis Tables
 
-- Render file path, total edits, active contributor count, risk status, and
-  contributor contribution cells.
+- Render file path, total edits, active contributor count, risk status, and one
+  column per contributor.
+- Each contributor cell should show both contribution percentage and edit count.
 - Use `StatusBadge` for high-risk files.
 - Do not render "Low Familiarity" in the first pass.
 - Use monospaced styling for file paths and numeric data.
@@ -312,6 +313,8 @@ Acceptance:
 - Risk files are labelled with visible text.
 - Non-risk files do not receive a second risk-like status label.
 - Contributor percentages and edit counts come from `bus-lib` output.
+- The file table preserves the legacy app's scan pattern: contributors are
+  columns, not a single collapsed activity column.
 
 ### 9. Add File Distribution Visualization
 

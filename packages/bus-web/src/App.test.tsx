@@ -284,15 +284,21 @@ describe("App", () => {
       within(overallTable).getByRole("columnheader", { name: "Status" }),
     ).toBeInTheDocument();
     expect(
-      within(overallTable).getByRole("columnheader", {
-        name: "Contributor Activity",
-      }),
+      within(overallTable).getByRole("columnheader", { name: "Alice Example" }),
+    ).toBeInTheDocument();
+    expect(
+      within(overallTable).getByRole("columnheader", { name: "Bob Example" }),
+    ).toBeInTheDocument();
+    expect(
+      within(overallTable).getByRole("columnheader", { name: "Cara Example" }),
     ).toBeInTheDocument();
 
     expect(within(overallTable).getByText("src/app.js")).toBeInTheDocument();
     expect(
-      within(overallTable).getAllByText("Alice Example").length,
-    ).toBeGreaterThan(0);
+      within(overallTable).getByRole("cell", {
+        name: "src/app.js, Alice Example contribution: 36.7%, 1 edit",
+      }),
+    ).toBeInTheDocument();
     expect(
       within(overallTable).getAllByText("High Risk").length,
     ).toBeGreaterThan(0);
