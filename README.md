@@ -1,6 +1,6 @@
 # Busfactor2
 
-Busfactor2 is the planned TypeScript evolution of the original
+Busfactor2 is the TypeScript evolution of the original
 [`criesbeck/busfactor`](https://github.com/criesbeck/busfactor) browser app.
 
 The tool analyzes git history to help small teams see:
@@ -9,27 +9,32 @@ The tool analyzes git history to help small teams see:
 - files with low contributor overlap
 - bus factor risk across source and documentation areas
 
-The new project target is:
+<img src="packages/bus-web/public/images/Bus_Factor_Splash_Large.png" alt="Busfactor2 project splash" width="720">
+
+The project is published at:
 
 ```text
 toddwseattle/busfactor2
 ```
 
-Milestone 0 is complete. The original static app implementation is preserved
-under `legacy/criesbeck-browser-app`, while the root contains the TypeScript npm
-workspace foundation.
+The original static app implementation is preserved under
+`legacy/criesbeck-browser-app`, while the root contains the Busfactor2 npm
+workspace.
 
 ## Packages
 
 Busfactor2 is an npm workspace with three packages:
 
-- `bus-lib`: shared TypeScript library foundation for report constants, public
-  types, and deterministic smoke report objects.
-- `bus-cli`: yargs-based Node CLI with smoke help and `analyze --agent` JSON
-  output.
-- `bus-web`: React + Vite web app with smoke upload and section placeholders.
+- `bus-lib`: shared TypeScript library for legacy git log parsing, weekly
+  commit stats, weighted activity scoring, bus factor risk detection, report
+  constants, and public report types.
+- `bus-cli`: yargs-based Node CLI. It can analyze a local repository, prepared
+  git log file, or stdin and render human text or deterministic JSON.
+- `bus-web`: React + Vite web app. It currently has the upload-first smoke UI
+  and imports public values from `bus-lib`; full report rendering is still a
+  follow-up migration.
 
-## Planned Report Sections
+## Report Sections
 
 Reports will include:
 
@@ -40,6 +45,49 @@ Reports will include:
 
 The `overall` section is computed from the selected source categories. It is not
 matched independently, which avoids double-counting.
+
+The current compatibility slice maps legacy `.js`, `.jsx`, `.ts`, `.tsx`,
+`.css`, `.html`, `.htm`, and `.yml` files into `ts-js-css`. Python and Markdown
+sections are present but remain empty until category expansion work lands.
+
+## CLI Usage
+
+Install dependencies once:
+
+```bash
+npm install
+```
+
+Show help and version:
+
+```bash
+npm --workspace bus-cli run dev -- --help
+npm --workspace bus-cli run dev -- --version
+npm --workspace bus-cli run dev -- analyze --help
+```
+
+Analyze the current repository and emit agent-readable JSON:
+
+```bash
+npm --workspace bus-cli run dev -- analyze . --agent
+```
+
+Analyze a prepared legacy git log fixture:
+
+```bash
+npm --workspace bus-cli run dev -- analyze --input packages/bus-lib/test/fixtures/legacy-git-log.txt
+npm --workspace bus-cli run dev -- analyze --input packages/bus-lib/test/fixtures/legacy-git-log.txt --agent
+```
+
+Supported first-slice `analyze` options:
+
+- `--input <file>`
+- `--stdin`
+- `--repo <path>`
+- `--ref <ref>`
+- `--format <human|json>`
+- `--agent`
+- `--no-color`
 
 ## Current Docs
 
@@ -61,25 +109,31 @@ Agent instructions:
 
 ## Current Status
 
-Milestone 0 is complete:
+The repository default branch is `main`. Milestone 0 is merged to `main`, and
+the first CLI legacy functionality slice is also merged.
 
-- current top-level documentation exists
+Complete:
+
+- npm workspace scaffold exists
 - Copilot, Codex, and Claude routing files exist
 - package-specific docs and work items exist
-- npm workspace scaffold exists
-- smoke versions of `bus-lib`, `bus-cli`, and `bus-web` build and test
+- `bus-lib` parses legacy git log text and computes real reports
+- `bus-cli analyze` uses `bus-lib` for local repo, file, and stdin analysis
+- deterministic JSON output is available through `--agent` or `--format json`
+- human CLI output includes weekly commits and bus factor rows
+- `bus-web` builds and tests as a smoke React app
 - Vitest runs in all packages
 - Husky + lint-staged git hooks are installed
 - the original static browser app is preserved under `legacy/`
 - the new repository remote is `toddwseattle/busfactor2`
-- branch `codex-milestone-0` is pushed to the new repository
 
-The next implementation focus is CLI parity with the old browser app:
+Current follow-up focus:
 
-- port legacy parsing, weekly commits, weighted frequency scoring, and bus
-  factor risk logic into `bus-lib`
-- wire `bus-cli analyze` to a local repo path first, then input files and stdin
-- emit deterministic JSON for agents and compact human output for terminals
+- expand `bus-lib` categories beyond legacy compatibility into TS/JS/CSS,
+  Python, and Markdown
+- migrate `bus-web` from smoke UI to real upload and report rendering
+- add later CLI features such as Markdown/NDJSON output, `--output`, threshold
+  overrides, row limits, and `--fail-on-risk`
 
 ## Workspace Commands
 
@@ -91,8 +145,11 @@ npm run build --workspaces
 npm run test --workspaces
 npm run typecheck --workspaces
 npm --workspace bus-cli run dev -- --help
+npm --workspace bus-cli run dev -- --version
 npm --workspace bus-cli run dev -- analyze --help
 npm --workspace bus-cli run dev -- analyze --agent
+npm --workspace bus-cli run dev -- analyze . --agent
+npm --workspace bus-cli run dev -- analyze --input packages/bus-lib/test/fixtures/legacy-git-log.txt --agent
 npm --workspace bus-web run build
 npm --workspace bus-web run dev
 npm run lint-staged

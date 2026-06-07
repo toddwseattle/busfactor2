@@ -1,6 +1,10 @@
 # Agent Prompt: Start CLI Legacy Functionality
 
-Use this prompt to start the next implementation agent.
+Status: historical. The first CLI legacy functionality slice is complete.
+
+This prompt is retained as the exact starter prompt used for that slice. Do not
+use it as the next work item; use the package work-item files for follow-up
+category, CLI, and web work.
 
 ````text
 Implement the first Busfactor2 CLI legacy functionality slice in this repository.

@@ -50,9 +50,9 @@ packages/bus-web/
       ReportTabs.tsx
 ```
 
-## Initial UI Shape
+## Current UI Shape
 
-Milestone 0 should render smoke content only:
+The current web package renders smoke content only:
 
 - app title
 - upload placeholder
@@ -60,7 +60,9 @@ Milestone 0 should render smoke content only:
 - visible section labels for Overall, TS/JS/CSS, Python, and Markdown
 - proof that the app can import a public value from `bus-lib`
 
-Real report rendering should land after `bus-lib` exposes the analyzer.
+`bus-lib` now exposes the analyzer. The next web work is replacing the smoke UI
+with real upload, analysis, report rendering, empty/loading/error states, and
+tests that consume `bus-lib` report output.
 
 ## Testing
 

@@ -14,9 +14,9 @@ Busfactor2 is planned as a TypeScript npm workspace with three packages:
 - `packages/bus-web`: React + Vite web app. It uploads a git log file and
   renders the same report produced by `bus-lib`.
 
-Until Milestone 0 is implemented, the current static browser files remain at the
-repository root. They are legacy source material to preserve and migrate from,
-not the long-term architecture.
+The original static browser files are preserved under
+`legacy/criesbeck-browser-app`. They are legacy source material to preserve and
+migrate from, not the long-term architecture.
 
 ## Source Of Truth
 
@@ -94,7 +94,7 @@ Use the package-specific prompts when the task fits:
 
 ## Commands
 
-Milestone 0 will define the final scripts. The intended commands are:
+Use these workspace commands:
 
 ```bash
 npm install
@@ -102,12 +102,13 @@ npm run build --workspaces
 npm run test --workspaces
 npm run typecheck --workspaces
 npm --workspace bus-cli run dev -- --help
+npm --workspace bus-cli run dev -- --version
+npm --workspace bus-cli run dev -- analyze --help
+npm --workspace bus-cli run dev -- analyze --agent
+npm --workspace bus-cli run dev -- analyze . --agent
 npm --workspace bus-web run dev
 npm run lint-staged
 ```
-
-If scripts do not exist yet, update the relevant Milestone 0 work item rather
-than inventing a conflicting script name.
 
 ## Documentation Rules
 

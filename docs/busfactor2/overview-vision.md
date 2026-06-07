@@ -39,13 +39,13 @@ The CLI should be explicit, repeatable, and parseable. An LLM should be able to 
 
 ## Current State
 
-Milestone 0 is complete. The repository is now a TypeScript npm workspace with
-three smoke packages:
+Milestone 0 is complete and merged to `main`. The repository is now a
+TypeScript npm workspace with three packages:
 
 - `packages/bus-lib`: exports public report constants, section IDs, report
-  types, and `createEmptyReport`.
-- `packages/bus-cli`: exposes yargs help and a smoke `analyze --agent` JSON
-  path.
+  types, `createEmptyReport`, `parseGitLog`, and `analyzeGitLog`.
+- `packages/bus-cli`: exposes yargs help, top-level `--version`, and real
+  `analyze` behavior for local repositories, input files, and stdin.
 - `packages/bus-web`: builds a React + Vite smoke UI that imports `bus-lib`.
 
 The original browser-only implementation is preserved in
@@ -56,7 +56,7 @@ The original browser-only implementation is preserved in
 - `gitstats.js`, `bus-factor.js`, and `upload.js` define Vue components.
 - `app.css` contains minimal styling.
 
-The current analyzer tracks file edits matching:
+The current shared analyzer tracks legacy-compatible file edits matching:
 
 ```text
 js, jsx, ts, tsx, css, html, htm, yml
@@ -73,13 +73,11 @@ contributors as active when their decayed contribution is at least 5 percent of
 the file's total frequency weighted by recency. The legacy code calls this value
 `frecency`.
 
-The next implementation slice is CLI parity with the old browser app. The
-current execution plan is
-[CLI legacy functionality plan](cli-legacy-functionality-plan.md), with
-package-level work items in [bus-lib work items](../bus-lib/work-items.md) and
-[bus-cli work items](../bus-cli/work-items.md). A ready-to-run starter prompt
-for a new agent lives in
-[start CLI legacy agent prompt](start-cli-legacy-agent-prompt.md).
+The first CLI legacy functionality slice is complete. `bus-cli analyze` now uses
+the public `bus-lib` package export to analyze prepared git log text or a local
+repository path. The current follow-up work is source category expansion,
+additional CLI output/options, and web app migration from smoke UI to real
+upload/report rendering.
 
 ## Repository Direction
 
@@ -95,8 +93,8 @@ Current Git remotes:
 - `origin`: `https://github.com/toddwseattle/busfactor2.git`
 - `upstream`: `https://github.com/criesbeck/busfactor.git`
 
-Keep original attribution in the README and package metadata. Avoid opening pull
-requests against `criesbeck/busfactor`.
+The repository default branch is `main`. Keep original attribution in the README
+and package metadata. Avoid opening pull requests against `criesbeck/busfactor`.
 
 ## Target Monorepo Layout
 
@@ -141,14 +139,12 @@ Use npm workspaces with three packages:
       src/
         index.ts
         analyzer.ts
-        categories.ts
+        constants.ts
         git-log.ts
-        report.ts
         types.ts
       test/
         fixtures/
-        analyzer.test.ts
-        git-log.test.ts
+          legacy-git-log.txt
     bus-cli/
       package.json
       tsconfig.json
@@ -160,7 +156,9 @@ Use npm workspaces with three packages:
         formatters/
           human.ts
           json.ts
-          markdown.ts
+        input/
+          git.ts
+          load.ts
     bus-web/
       package.json
       tsconfig.json
@@ -238,7 +236,12 @@ __pycache__/
 
 Markdown files should be reported separately from source code because they usually represent docs ownership, not runtime ownership. Python files should be separate because a repository may have both TypeScript/JavaScript/CSS and Python service or automation code, and combining them can hide ownership risk. The overall section should still make the aggregate risk picture easy to scan.
 
-The library should support custom categories later, but the first implementation can hard-code these defaults and expose a typed config object. Legacy HTML/YAML tracking can be added as an explicit compatibility category or an option later; the first Busfactor2 visible sections should follow `overall`, `ts-js-css`, `python`, and `markdown`.
+The current implementation preserves legacy tracking first: `.js`, `.jsx`,
+`.ts`, `.tsx`, `.css`, `.html`, `.htm`, and `.yml` are mapped to `ts-js-css`.
+Python and Markdown sections are emitted but empty until category expansion
+lands. The library should support custom categories later, but the first
+Busfactor2 visible sections remain `overall`, `ts-js-css`, `python`, and
+`markdown`.
 
 ## Git Log Input Strategy
 
@@ -357,16 +360,23 @@ busfactor analyze --repo . --format json --output busfactor-report.json
 busfactor analyze --repo . --format markdown --sections summary,commits,overall,ts-js-css,python,markdown
 ```
 
-Recommended options:
+Implemented first-slice options:
+
+| Option           | Purpose                                                                                  |
+| ---------------- | ---------------------------------------------------------------------------------------- | --------------------------------------- |
+| `--repo <path>`  | Run git log inside a local repository.                                                   |
+| `--ref <ref>`    | Git ref or branch to analyze. Default: `main`.                                           |
+| `--input <file>` | Analyze an existing git log text file.                                                   |
+| `--stdin`        | Read git log text from standard input.                                                   |
+| `--format <human | json>`                                                                                   | Select output format. Default: `human`. |
+| `--agent`        | Shortcut for deterministic JSON output with no prose and no color.                       |
+| `--no-color`     | Disable terminal colors. Human output is plain text in the current implementation slice. |
+
+Planned later options:
 
 | Option                         | Purpose                                                                                        |
-| ------------------------------ | ---------------------------------------------------------------------------------------------- | -------- | -------- | --------------------------------------- |
-| `--repo <path>`                | Run git log inside a local repository.                                                         |
-| `--ref <ref>`                  | Git ref or branch to analyze. Default: `main`.                                                 |
-| `--input <file>`               | Analyze an existing git log text file.                                                         |
-| `--stdin`                      | Read git log text from standard input.                                                         |
-| `--format <human               | json                                                                                           | markdown | ndjson>` | Select output format. Default: `human`. |
-| `--agent`                      | Shortcut for deterministic agent output. Equivalent to JSON, no color, stable ordering.        |
+| ------------------------------ | ---------------------------------------------------------------------------------------------- | ------------------------------------------------------------------ |
+| `--format <markdown            | ndjson>`                                                                                       | Add Markdown and NDJSON output after JSON/human output stabilizes. |
 | `--output <file>`              | Write report output to a file instead of stdout.                                               |
 | `--sections <list>`            | Include selected sections: `summary`, `commits`, `overall`, `ts-js-css`, `python`, `markdown`. |
 | `--categories <list>`          | Analyze selected source categories: `ts-js-css`, `python`, `markdown`. Default: all.           |
@@ -374,15 +384,14 @@ Recommended options:
 | `--half-life-days <number>`    | Decay half-life. Default: `7`.                                                                 |
 | `--risk-contributors <number>` | Minimum active contributors before a file is not risky. Default: `3`.                          |
 | `--top <number>`               | Limit rows per bus factor section.                                                             |
-| `--no-color`                   | Disable terminal colors. Useful for agents and CI logs.                                        |
 | `--fail-on-risk`               | Exit non-zero when risky files are found. Useful for CI.                                       |
 
-Input precedence should be explicit:
+Current first-slice input precedence is:
 
 1. `--input`
 2. `--stdin`
-3. `--repo`
-4. positional path, interpreted as a repo path
+3. positional path, interpreted as a repo path
+4. `--repo`
 
 If no input is provided, default to `--repo .`.
 
@@ -701,6 +710,8 @@ Exit criteria:
 
 ### Milestone 1: CLI Legacy Functionality
 
+Status: complete.
+
 Port enough of the old browser app into `bus-lib` and `bus-cli` for the CLI to
 analyze existing `git log --no-merges --name-status main` output.
 
@@ -718,22 +729,10 @@ Exit criteria:
   commits and bus factor tables.
 - package and workspace build, test, typecheck, and CLI smoke commands pass.
 
-### Milestone 2: Workspace Hardening And Public Contracts
+### Milestone 2: Source Category Expansion
 
-- Replace smoke-only exports with initial real public types and package boundaries.
-- Confirm workspace scripts, TypeScript references, Vitest configs, and package exports are stable.
-- Add initial fixture-based tests that will support analyzer migration.
-- Keep root package metadata aligned with `toddwseattle/busfactor2`.
-
-Exit criteria:
-
-- CLI and web packages consume `bus-lib` only through public package exports.
-- test fixtures exist for legacy git log inputs.
-- package docs match implemented package boundaries.
-
-### Milestone 3: Source Category Expansion
-
-- Add TS/JS/CSS, Python, and Markdown source categories.
+- Expand from legacy compatibility tracking to explicit TS/JS/CSS, Python, and
+  Markdown source categories.
 - Produce separate `SectionReport` entries plus a derived overall section.
 - Add source category and overall rollup tests.
 
@@ -742,7 +741,7 @@ Exit criteria:
 - one fixture produces four bus factor sections: overall, TS/JS/CSS, Python, and
   Markdown.
 
-### Milestone 4: CLI Expansion
+### Milestone 3: CLI Expansion
 
 - Expand `busfactor analyze` beyond old-app parity.
 - Support `--repo`, `--stdin`, `--format markdown`, `--output`, threshold
@@ -756,9 +755,9 @@ Exit criteria:
 - `busfactor analyze --repo . --agent --fail-on-risk` exits according to risk
   policy.
 
-### Milestone 5: Web Migration
+### Milestone 4: Web Migration
 
-- Create Vite React app in `bus-web`.
+- Replace the current Vite React smoke app with a real upload/report UI.
 - Rebuild upload flow using shared library.
 - Render commit stats and section-specific bus factor tables.
 - Present overall, TS/JS/CSS, Python, and Markdown sections as tabs or collapsible panels.
@@ -767,7 +766,7 @@ Exit criteria:
 
 - uploaded legacy git log renders equivalent commit data plus overall, TS/JS/CSS, Python, and Markdown sections.
 
-### Milestone 6: Release Readiness
+### Milestone 5: Release Readiness
 
 - Update README with web and CLI usage.
 - Confirm GitHub repository metadata, package names, CI, and docs are ready for normal development.
@@ -782,7 +781,9 @@ Exit criteria:
 
 ### Date Handling
 
-The current implementation uses locale-formatted Sunday labels. The library should use ISO dates internally and let formatters choose display text. This prevents agent and CI output from changing by machine locale.
+The legacy browser implementation used locale-formatted Sunday labels. The
+current library stores ISO Sunday dates internally and lets formatters choose
+display text. This prevents agent and CI output from changing by machine locale.
 
 ### Rename Handling
 

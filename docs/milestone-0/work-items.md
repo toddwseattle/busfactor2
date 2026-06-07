@@ -1,13 +1,13 @@
 # Milestone 0 Work Items
 
-Status: complete. Milestone 0 was implemented and pushed on branch
-`codex-milestone-0` to
+Status: complete. Milestone 0 was implemented on branch `codex-milestone-0`,
+merged to `main`, and pushed to
 [`toddwseattle/busfactor2`](https://github.com/toddwseattle/busfactor2).
 
-Next work is tracked in
-[CLI legacy functionality plan](../busfactor2/cli-legacy-functionality-plan.md),
-[bus-lib work items](../bus-lib/work-items.md), and
-[bus-cli work items](../bus-cli/work-items.md).
+The first CLI legacy functionality slice is also complete. Next work is tracked
+in [bus-lib work items](../bus-lib/work-items.md),
+[bus-cli work items](../bus-cli/work-items.md), and
+[bus-web work items](../bus-web/work-items.md).
 
 Items are grouped by workstream. Complete them in order unless a later item is
 explicitly independent.
@@ -118,15 +118,18 @@ explicitly independent.
 
 - `git remote -v` clearly shows the original source and new Busfactor2 target.
 
-### M0-R3 — Push Milestone 0 branch
+### M0-R3 — Push Milestone 0 branch and merge to main
 
 **Required change:**
 
 - Push the Milestone 0 branch to `toddwseattle/busfactor2`.
+- Merge Milestone 0 to `main`.
+- Set `main` as the repository default branch.
 
 **Acceptance:**
 
-- GitHub shows the branch in the new repository.
+- GitHub shows the branch and `main` in the new repository.
+- GitHub reports `main` as the default branch.
 
 ## Workspace Scaffold
 

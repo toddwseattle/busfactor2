@@ -41,10 +41,12 @@ Package docs:
 - `docs/bus-cli/README.md`
 - `docs/bus-web/README.md`
 
-Current implementation plan:
+Current implementation and follow-up plans:
 
 - `docs/busfactor2/cli-legacy-functionality-plan.md`
-- `docs/busfactor2/start-cli-legacy-agent-prompt.md`
+- `docs/bus-lib/work-items.md`
+- `docs/bus-cli/work-items.md`
+- `docs/bus-web/work-items.md`
 
 ## How To Assign Work To An Agent
 
@@ -67,7 +69,8 @@ Update the bus-web design template only. Do not scaffold React code yet.
 ```
 
 ```text
-Implement CLI-M0-2. Keep behavior smoke-only and do not migrate parser logic.
+Implement BL-M1-4. Keep category scoring in bus-lib and update CLI/web consumers
+only through public bus-lib exports.
 ```
 
 ## Work Boundaries
@@ -109,15 +112,18 @@ consumers.
 
 ## Verification Expectations
 
-Milestone 0 target commands:
+Current workspace verification commands:
 
 ```bash
 npm run build --workspaces
 npm run test --workspaces
 npm run typecheck --workspaces
 npm --workspace bus-cli run dev -- --help
+npm --workspace bus-cli run dev -- --version
 npm --workspace bus-cli run dev -- analyze --help
 npm --workspace bus-cli run dev -- analyze --agent
+npm --workspace bus-cli run dev -- analyze . --agent
+npm --workspace bus-cli run dev -- analyze --input packages/bus-lib/test/fixtures/legacy-git-log.txt --agent
 npm --workspace bus-web run build
 npm run lint-staged
 ```
@@ -157,7 +163,7 @@ Before asking an agent to continue, check:
 
 ## Commit And PR Guidance
 
-For Milestone 0:
+For this repository:
 
 - preserve original project attribution
 - push to `toddwseattle/busfactor2`

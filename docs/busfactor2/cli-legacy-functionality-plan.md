@@ -1,6 +1,8 @@
 # CLI Legacy Functionality Plan
 
-This plan defines the next implementation slice after Milestone 0. The goal is
+Status: complete.
+
+This plan defined the first implementation slice after Milestone 0. The goal was
 to make `bus-cli` perform the old browser app analysis from the command line
 while preserving behavior in `bus-lib` first.
 
@@ -14,6 +16,8 @@ Reference docs:
 - [starter agent prompt](start-cli-legacy-agent-prompt.md)
 
 ## Scope
+
+Implemented.
 
 In scope for the first CLI parity slice:
 
@@ -64,6 +68,8 @@ workflow.
 
 ## Implementation Order
 
+Completed.
+
 1. Add `bus-lib` fixtures and failing expectation tests for the old app
    behavior.
 2. Port pure parser helpers from `legacy/criesbeck-browser-app/app.js` into
@@ -79,6 +85,8 @@ workflow.
 10. Run full workspace verification.
 
 ## Verification
+
+Completed for the first slice.
 
 Required commands for the first slice:
 

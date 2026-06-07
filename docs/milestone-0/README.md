@@ -1,13 +1,13 @@
 # Milestone 0 Plan
 
-Status: complete.
+Status: complete and merged to `main`.
 
-Milestone 0 was implemented and pushed on branch `codex-milestone-0` to
-[`toddwseattle/busfactor2`](https://github.com/toddwseattle/busfactor2). The
-original repository remains available as the `upstream` remote.
+Milestone 0 was implemented on branch `codex-milestone-0`, merged to `main`, and
+pushed to [`toddwseattle/busfactor2`](https://github.com/toddwseattle/busfactor2).
+The original repository remains available as the `upstream` remote.
 
-Milestone 0 creates an agent-ready Busfactor2 foundation before the real analyzer
-migration begins.
+Milestone 0 created an agent-ready Busfactor2 foundation before the analyzer
+migration began. The first CLI legacy analyzer slice has since landed.
 
 The goal is not to finish the TypeScript migration. The goal is to make the repo
 safe for parallel agent work by establishing documentation, package boundaries,
@@ -22,12 +22,14 @@ Milestone 0 is complete. The repository now has:
 - humans have a guide for using the repo with agents
 - package docs exist for `bus-lib`, `bus-cli`, and `bus-web`
 - the root project is an npm workspace
-- all three packages have smoke implementations
+- all three packages have working scaffold implementations
+- `bus-lib` and `bus-cli` have since moved beyond smoke behavior for the first
+  CLI legacy analyzer slice
 - Vitest runs in all three packages
 - Husky + lint-staged hooks run fast local checks
 - current static app files are preserved in a legacy migration location
 - the new repository target is `toddwseattle/busfactor2`
-- the milestone branch is pushed to the new repository
+- `main` is the GitHub default branch
 
 ## Scope
 
@@ -43,7 +45,7 @@ In scope:
 - preserving current files for migration
 - creating and pushing to the new repo
 
-Out of scope:
+Originally out of scope for Milestone 0:
 
 - full parser migration
 - real yargs `analyze` implementation beyond smoke/help behavior
@@ -123,8 +125,9 @@ so the repository root represents the new workspace direction.
 7. Verification and push.
 
 Detailed work items are in [work-items.md](work-items.md). Next implementation
-planning continues in
-[CLI legacy functionality plan](../busfactor2/cli-legacy-functionality-plan.md).
+planning continued in
+[CLI legacy functionality plan](../busfactor2/cli-legacy-functionality-plan.md),
+which is now complete for the first CLI legacy slice.
 
 ## Milestone 0 Verification
 
@@ -145,7 +148,8 @@ npm run lint-staged
 Confirmed:
 
 - `git remote -v` shows the new Busfactor2 remote.
-- the branch is pushed to `toddwseattle/busfactor2`.
+- the milestone branch and `main` are pushed to `toddwseattle/busfactor2`.
+- `main` is the GitHub default branch.
 - `legacy/criesbeck-browser-app` contains the current static app source.
 - root static files are not needed by the new smoke packages.
 - `.husky/pre-commit` runs `lint-staged`.
