@@ -1,22 +1,197 @@
-import { render, screen } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
-import { REPORT_SCHEMA_VERSION } from "bus-lib";
+import {
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+  within,
+} from "@testing-library/react";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { App } from "./App.js";
 
+const gitLogSample = `commit 1111111111111111111111111111111111111111
+Author: Alice Example <alice@example.com>
+Date:   Thu Feb 1 12:00:00 2024 +0000
+
+M\tsrc/app.js
+M\tsrc/feature.ts
+A\tsrc/component.jsx
+C\tstyles/copied.css
+A\tstyles/site.css
+M\tdocs/readme.md
+
+commit 2222222222222222222222222222222222222222
+Author: Bob Example <bob@example.com>
+Date:   Wed Jan 31 12:00:00 2024 +0000
+
+M\tsrc/app.js
+M\tstyles/site.css
+
+commit 3333333333333333333333333333333333333333
+Author: Cara Example <cara@example.com>
+Date:   Tue Jan 30 12:00:00 2024 +0000
+
+M\tsrc/app.js
+A\tsrc/view.tsx
+
+commit 4444444444444444444444444444444444444444
+Author: Alice Example <alice@example.com>
+Date:   Thu Jan 25 12:00:00 2024 +0000
+
+M\tsrc/feature.ts
+`;
+
+const createGitLogFile = (
+  text: string,
+  name = "sample-git-log.txt",
+  textReader: () => Promise<string> = () => Promise.resolve(text),
+) => {
+  const file = new File([text], name, { type: "text/plain" });
+  Object.defineProperty(file, "text", {
+    configurable: true,
+    value: textReader,
+  });
+  return file;
+};
+
+const uploadGitLog = (text: string, name = "sample-git-log.txt") => {
+  const file = createGitLogFile(text, name);
+  const input = screen.getByLabelText("Git log file");
+  fireEvent.change(input, { target: { files: [file] } });
+};
+
+afterEach(() => {
+  cleanup();
+  vi.restoreAllMocks();
+});
+
 describe("App", () => {
-  it("renders the smoke UI from bus-lib exports", () => {
+  it("renders the branded empty state and footer", () => {
     render(<App />);
 
     expect(
       screen.getByRole("heading", { level: 1, name: "Busfactor2" }),
     ).toBeInTheDocument();
     expect(screen.getByLabelText("Git log file")).toBeInTheDocument();
-    expect(screen.getByText("Overall")).toBeInTheDocument();
-    expect(screen.getByText("TS/JS/CSS")).toBeInTheDocument();
-    expect(screen.getByText("Python")).toBeInTheDocument();
-    expect(screen.getByText("Markdown")).toBeInTheDocument();
     expect(
-      screen.getByText(new RegExp(REPORT_SCHEMA_VERSION)),
+      screen.getByRole("heading", { name: "No report generated yet" }),
     ).toBeInTheDocument();
+    expect(
+      screen.getByText("(c) Todd Warren and Chris Riesbeck 2026"),
+    ).toBeInTheDocument();
+  });
+
+  it("renders a loading state while reading the uploaded file", async () => {
+    let resolveText: (text: string) => void = () => undefined;
+    const file = createGitLogFile(
+      gitLogSample,
+      "slow-git-log.txt",
+      () =>
+        new Promise<string>((resolve) => {
+          resolveText = resolve;
+        }),
+    );
+    render(<App />);
+
+    fireEvent.change(screen.getByLabelText("Git log file"), {
+      target: { files: [file] },
+    });
+
+    expect(
+      screen.getByRole("heading", { name: "Analyzing git log" }),
+    ).toBeInTheDocument();
+
+    resolveText(gitLogSample);
+    expect(
+      await screen.findByRole("heading", { name: "Project signal" }),
+    ).toBeInTheDocument();
+  });
+
+  it("uploads a deterministic git log and renders summary metrics", async () => {
+    render(<App />);
+
+    uploadGitLog(gitLogSample);
+
+    expect(
+      await screen.findByRole("heading", { name: "Project signal" }),
+    ).toBeInTheDocument();
+
+    const authors = screen.getByRole("article", { name: "Total Authors" });
+    const trackedFiles = screen.getByRole("article", {
+      name: "Tracked Files",
+    });
+    const riskFiles = screen.getByRole("article", { name: "Risk Files" });
+    const activeWeeks = screen.getByRole("article", { name: "Active Weeks" });
+
+    expect(within(authors).getByText("3")).toBeInTheDocument();
+    expect(within(trackedFiles).getByText("7")).toBeInTheDocument();
+    expect(within(riskFiles).getByText("6")).toBeInTheDocument();
+    expect(within(activeWeeks).getByText("2")).toBeInTheDocument();
+  });
+
+  it("labels the section distribution chart as tracked files", async () => {
+    render(<App />);
+
+    uploadGitLog(gitLogSample);
+
+    expect(
+      await screen.findByRole("heading", {
+        name: "Tracked files by report section",
+      }),
+    ).toBeInTheDocument();
+    const chart = screen
+      .getByRole("heading", { name: "Tracked files by report section" })
+      .closest("section");
+    if (chart === null) {
+      throw new Error("Missing section distribution chart.");
+    }
+    expect(
+      screen.getByRole("progressbar", { name: "Overall tracked files" }),
+    ).toHaveAttribute("aria-valuenow", "7");
+    expect(
+      screen.getByRole("progressbar", { name: "TS/JS/CSS tracked files" }),
+    ).toHaveAttribute("aria-valuenow", "6");
+    expect(screen.getByText("7 tracked files")).toBeInTheDocument();
+    expect(within(chart).queryByText(/\bLOC\b/i)).not.toBeInTheDocument();
+  });
+
+  it("keeps report section labels visible with high-risk status only", async () => {
+    render(<App />);
+
+    uploadGitLog(gitLogSample);
+
+    expect(
+      await screen.findByRole("heading", { level: 3, name: "Overall" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { level: 3, name: "TS/JS/CSS" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { level: 3, name: "Python" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { level: 3, name: "Markdown" }),
+    ).toBeInTheDocument();
+    expect(screen.getAllByText("High Risk").length).toBeGreaterThan(0);
+    expect(screen.queryByText(/Low Familiarity/i)).not.toBeInTheDocument();
+  });
+
+  it("renders an accessible upload error for empty files", async () => {
+    render(<App />);
+
+    uploadGitLog("", "empty-git-log.txt");
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "Upload a non-empty git log file.",
+    );
+  });
+
+  it("renders an accessible upload error for unrecognized text", async () => {
+    render(<App />);
+
+    uploadGitLog("this is not a git log", "notes.txt");
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "The uploaded file did not contain a recognizable git log.",
+    );
   });
 });
