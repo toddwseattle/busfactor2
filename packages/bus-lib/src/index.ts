@@ -1,41 +1,32 @@
-import type {
-  BusfactorAnalysisOptions,
-  BusfactorReport,
-  ReportSectionDefinition,
-  ReportSectionId,
-} from "./types.js";
+import type { BusfactorReport } from "./types.js";
+export { analyzeGitLog } from "./analyzer.js";
+export {
+  DEFAULT_ANALYSIS_OPTIONS,
+  DEFAULT_REPORT_SECTIONS,
+  DEFAULT_SECTION_IDS,
+  REPORT_SCHEMA_VERSION,
+} from "./constants.js";
+export { parseGitLog } from "./git-log.js";
+import {
+  DEFAULT_ANALYSIS_OPTIONS,
+  DEFAULT_REPORT_SECTIONS,
+  REPORT_SCHEMA_VERSION,
+} from "./constants.js";
 
 export type {
+  AuthorCommitStats,
   BusfactorAnalysisOptions,
   BusfactorReport,
   BusfactorReportSection,
   BusfactorReportSource,
   BusfactorReportSummary,
-  ReportSectionDefinition,
+  FileContributionReport,
+  FileContributorReport,
+  GitFileChange,
+  GitLogCommit,
   ReportSectionId,
+  WeeklyCommitCount,
 } from "./types.js";
-
-export const REPORT_SCHEMA_VERSION = "busfactor.report.v1";
-
-export const DEFAULT_SECTION_IDS = [
-  "overall",
-  "ts-js-css",
-  "python",
-  "markdown",
-] as const satisfies readonly ReportSectionId[];
-
-export const DEFAULT_REPORT_SECTIONS = [
-  { id: "overall", label: "Overall" },
-  { id: "ts-js-css", label: "TS/JS/CSS" },
-  { id: "python", label: "Python" },
-  { id: "markdown", label: "Markdown" },
-] as const satisfies readonly ReportSectionDefinition[];
-
-export const DEFAULT_ANALYSIS_OPTIONS = {
-  activeThreshold: 0.05,
-  halfLifeDays: 7,
-  riskContributorCount: 3,
-} as const satisfies BusfactorAnalysisOptions;
 
 export const createEmptyReport = (): BusfactorReport => ({
   schemaVersion: REPORT_SCHEMA_VERSION,
@@ -50,9 +41,12 @@ export const createEmptyReport = (): BusfactorReport => ({
     label: section.label,
     totalFiles: 0,
     riskFiles: 0,
+    files: [],
   })),
   summary: {
     totalFiles: 0,
     riskFiles: 0,
+    authorCount: 0,
+    weekCount: 0,
   },
 });

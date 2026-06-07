@@ -51,7 +51,12 @@ moving the legacy analyzer behavior into `bus-lib`. Keep this milestone focused
 on compatibility with `legacy/criesbeck-browser-app/app.js`; category expansion
 can follow once the old behavior is covered by tests.
 
+Status: BL-M1-0 through BL-M1-3 are implemented for the first CLI legacy
+functionality slice. BL-M1-4 remains follow-up category expansion.
+
 ### BL-M1-0 — Add legacy git log fixtures
+
+Status: implemented.
 
 **Files:** `packages/bus-lib/test/fixtures/*`,
 `packages/bus-lib/src/*.test.ts`
@@ -78,6 +83,8 @@ porting implementation code.
 
 ### BL-M1-1 — Port legacy parser into pure TypeScript
 
+Status: implemented.
+
 **Legacy source:** `legacy/criesbeck-browser-app/app.js`
 
 **Goal:** Move parser and scoring logic into `bus-lib` without changing behavior.
@@ -98,6 +105,8 @@ porting implementation code.
   and risk behavior.
 
 ### BL-M1-2 — Port legacy weekly commit and weighted frequency scoring
+
+Status: implemented.
 
 **Legacy source:** `legacy/criesbeck-browser-app/app.js`
 
@@ -122,6 +131,8 @@ library code. The legacy source calls the weighted file activity value
   modules.
 
 ### BL-M1-3 — Expose `analyzeGitLog` report API for CLI parity
+
+Status: implemented.
 
 **Files:** `packages/bus-lib/src/index.ts`, `packages/bus-lib/src/types.ts`
 

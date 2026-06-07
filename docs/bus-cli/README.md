@@ -56,23 +56,28 @@ Primary command:
 busfactor analyze [path]
 ```
 
-Important options:
+Implemented first-slice options:
 
 - `--repo <path>`
 - `--ref <ref>`
 - `--input <file>`
 - `--stdin`
-- `--format <human|json|markdown|ndjson>`
+- `--format <human|json>`
 - `--agent`
-- `--output <file>`
-- `--sections <summary,commits,overall,ts-js-css,python,markdown>`
-- `--categories <ts-js-css,python,markdown>`
-- `--threshold <number>`
-- `--half-life-days <number>`
-- `--risk-contributors <number>`
-- `--top <number>`
 - `--no-color`
-- `--fail-on-risk`
+
+Planned later options include Markdown/NDJSON output, `--output`, section and
+category selection, threshold overrides, `--top`, and `--fail-on-risk`.
+
+Input precedence for the first slice is:
+
+1. `--input <file>`
+2. `--stdin`
+3. positional `path`
+4. `--repo <path>`, defaulting to `.`
+
+Repository input runs `git -C <repo> log --no-merges --name-status <ref>` using
+argument arrays. The default ref is `main` to match the legacy browser app usage.
 
 ## Agent Mode
 
@@ -84,6 +89,10 @@ Important options:
 - Stable ordering.
 - Include `schemaVersion`.
 - Include all selected source categories plus `overall`.
+
+For the first slice, `--agent` is equivalent to JSON output and does not change
+the process exit code for risky files. Non-zero exits are reserved for input,
+parse, or command failures.
 
 ## Testing
 

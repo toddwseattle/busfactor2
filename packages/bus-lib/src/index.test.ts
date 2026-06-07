@@ -31,24 +31,28 @@ describe("bus-lib smoke exports", () => {
         "schemaVersion": "busfactor.report.v1",
         "sections": [
           {
+            "files": [],
             "id": "overall",
             "label": "Overall",
             "riskFiles": 0,
             "totalFiles": 0,
           },
           {
+            "files": [],
             "id": "ts-js-css",
             "label": "TS/JS/CSS",
             "riskFiles": 0,
             "totalFiles": 0,
           },
           {
+            "files": [],
             "id": "python",
             "label": "Python",
             "riskFiles": 0,
             "totalFiles": 0,
           },
           {
+            "files": [],
             "id": "markdown",
             "label": "Markdown",
             "riskFiles": 0,
@@ -59,8 +63,10 @@ describe("bus-lib smoke exports", () => {
           "mode": "git-log",
         },
         "summary": {
+          "authorCount": 0,
           "riskFiles": 0,
           "totalFiles": 0,
+          "weekCount": 0,
         },
         "weeks": [],
       }

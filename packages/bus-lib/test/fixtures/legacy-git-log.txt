@@ -1,0 +1,42 @@
+commit 1111111111111111111111111111111111111111
+Author: Alice Example <alice@example.com>
+Date:   Thu Feb 1 12:00:00 2024 +0000
+
+M	src/app.js
+M	src/feature.ts
+A	src/component.jsx
+C	styles/copied.css
+A	styles/site.css
+M	public/index.html
+M	public/help.htm
+M	config/app.yml
+M	node_modules/pkg/index.js
+M	build/generated.js
+M	dist/bundle.js
+M	docs/readme.md
+
+commit 2222222222222222222222222222222222222222
+Author: Bob Example <bob@example.com>
+Date:   Wed Jan 31 12:00:00 2024 +0000
+
+M	src/app.js
+M	styles/site.css
+
+commit 3333333333333333333333333333333333333333
+Author: Cara Example <cara@example.com>
+Date:   Tue Jan 30 12:00:00 2024 +0000
+
+M	src/app.js
+A	src/view.tsx
+
+commit 4444444444444444444444444444444444444444
+Author: Alice Example <alice@example.com>
+Date:   Thu Jan 25 12:00:00 2024 +0000
+
+M	src/feature.ts
+
+commit 5555555555555555555555555555555555555555
+Author: Bob Example <bob@example.com>
+Date:   Wed Jan 24 12:00:00 2024 +0000
+
+D	src/removed.ts
