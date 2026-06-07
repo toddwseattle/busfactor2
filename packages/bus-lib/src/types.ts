@@ -1,4 +1,10 @@
-export type ReportSectionId = "overall" | "ts-js-css" | "python" | "markdown";
+export type DefaultReportSectionId =
+  | "overall"
+  | "ts-js-css"
+  | "python"
+  | "markdown";
+
+export type ReportSectionId = DefaultReportSectionId | (string & {});
 
 export interface ReportSectionDefinition {
   id: ReportSectionId;
@@ -19,6 +25,14 @@ export interface BusfactorAnalysisOptions {
   halfLifeDays: number;
   riskContributorCount: number;
   source?: BusfactorReportSource;
+  categories?: readonly FileCategoryDefinition[];
+}
+
+export interface FileCategoryDefinition {
+  id: string;
+  label: string;
+  extensions: readonly string[];
+  includeInOverall?: boolean;
 }
 
 export interface GitFileChange {

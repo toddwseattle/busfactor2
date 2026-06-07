@@ -69,6 +69,24 @@ Implemented first-slice options:
 Planned later options include Markdown/NDJSON output, `--output`, section and
 category selection, threshold overrides, `--top`, and `--fail-on-risk`.
 
+## Source Categories
+
+`bus-cli` does not own filetype matching. It passes prepared git log text to
+`bus-lib` through the public `analyzeGitLog(text, options?)` export and renders
+the returned report sections.
+
+The current `bus-lib` defaults populate:
+
+- `overall`: derived from included source categories
+- `ts-js-css`: `.ts`, `.tsx`, `.js`, `.jsx`, and `.css`
+- `python`: `.py` and `.pyi`
+- `markdown`: `.md`, `.mdx`, and `.markdown`
+
+This means `busfactor analyze --input <file>` and `busfactor analyze --agent`
+can include Markdown rows without new CLI flags. Planned category selection
+options should pass category choices to `bus-lib`; they should not duplicate
+extension rules in CLI code.
+
 Input precedence for the first slice is:
 
 1. `--input <file>`

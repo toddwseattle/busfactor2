@@ -9,6 +9,11 @@ const fixturePath = join(
   "../test/fixtures/legacy-git-log.txt",
 );
 const fixture = readFileSync(fixturePath, "utf8");
+const categoryFixturePath = join(
+  import.meta.dirname,
+  "../test/fixtures/category-git-log.txt",
+);
+const categoryFixture = readFileSync(categoryFixturePath, "utf8");
 
 describe("legacy git log parser", () => {
   it("parses authors, dates, and name-status file lines", () => {
@@ -69,10 +74,16 @@ describe("legacy analyzer behavior", () => {
     ]);
 
     const section = report.sections.find((entry) => entry.id === "ts-js-css");
+    const markdown = report.sections.find((entry) => entry.id === "markdown");
+    const python = report.sections.find((entry) => entry.id === "python");
     const overall = report.sections.find((entry) => entry.id === "overall");
-    expect(section?.totalFiles).toBe(9);
-    expect(section?.riskFiles).toBe(8);
-    expect(overall?.files).toEqual(section?.files);
+    expect(section?.totalFiles).toBe(6);
+    expect(section?.riskFiles).toBe(5);
+    expect(markdown?.totalFiles).toBe(1);
+    expect(markdown?.riskFiles).toBe(1);
+    expect(python?.totalFiles).toBe(0);
+    expect(overall?.totalFiles).toBe(7);
+    expect(overall?.riskFiles).toBe(6);
 
     const paths = section?.files.map((file) => file.path);
     expect(paths).toEqual([
@@ -81,9 +92,18 @@ describe("legacy analyzer behavior", () => {
       "src/feature.ts",
       "src/component.jsx",
       "styles/copied.css",
-      "public/index.html",
-      "public/help.htm",
-      "config/app.yml",
+      "src/view.tsx",
+    ]);
+    expect(markdown?.files.map((file) => file.path)).toEqual([
+      "docs/readme.md",
+    ]);
+    expect(overall?.files.map((file) => file.path)).toEqual([
+      "src/app.js",
+      "styles/site.css",
+      "src/feature.ts",
+      "src/component.jsx",
+      "styles/copied.css",
+      "docs/readme.md",
       "src/view.tsx",
     ]);
     expect(paths).not.toContain("node_modules/pkg/index.js");
@@ -122,11 +142,58 @@ describe("legacy analyzer behavior", () => {
     });
 
     expect(report.summary).toEqual({
-      totalFiles: 9,
-      riskFiles: 8,
+      totalFiles: 7,
+      riskFiles: 6,
       authorCount: 3,
       weekCount: 2,
     });
+  });
+
+  it("builds source category sections with markdown and python files", () => {
+    const report = analyzeGitLog(categoryFixture);
+    const overall = report.sections.find((entry) => entry.id === "overall");
+    const tsJsCss = report.sections.find((entry) => entry.id === "ts-js-css");
+    const python = report.sections.find((entry) => entry.id === "python");
+    const markdown = report.sections.find((entry) => entry.id === "markdown");
+
+    expect(report.sections.map((section) => section.id)).toEqual([
+      "overall",
+      "ts-js-css",
+      "python",
+      "markdown",
+    ]);
+    expect(tsJsCss?.files.map((file) => file.path)).toEqual([
+      "src/app.ts",
+      "src/styles.css",
+    ]);
+    expect(python?.files.map((file) => file.path)).toEqual([
+      "scripts/tool.py",
+      "scripts/types.pyi",
+    ]);
+    expect(markdown?.files.map((file) => file.path)).toEqual([
+      "docs/readme.md",
+      "docs/guide.mdx",
+      "docs/reference.markdown",
+      "README.MD",
+    ]);
+    expect(overall?.totalFiles).toBe(
+      (tsJsCss?.totalFiles ?? 0) +
+        (python?.totalFiles ?? 0) +
+        (markdown?.totalFiles ?? 0),
+    );
+    expect(overall?.files.map((file) => file.path)).not.toContain(
+      "node_modules/docs/ignored.md",
+    );
+    expect(overall?.files.map((file) => file.path)).not.toContain(
+      "build/docs/ignored.md",
+    );
+    expect(overall?.files.map((file) => file.path)).not.toContain(
+      "dist/docs/ignored.mdx",
+    );
+    expect(overall?.files.map((file) => file.path)).not.toContain("notes.txt");
+    expect(overall?.files.map((file) => file.path)).not.toContain(
+      "docs/deleted.md",
+    );
   });
 
   it("returns a deterministic empty report for empty input", () => {

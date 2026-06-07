@@ -1,0 +1,32 @@
+commit aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+Author: Alice Example <alice@example.com>
+Date:   Thu Feb 1 12:00:00 2024 +0000
+
+M	src/app.ts
+M	src/styles.css
+M	scripts/tool.py
+A	scripts/types.pyi
+M	docs/readme.md
+A	docs/guide.mdx
+M	docs/reference.markdown
+M	README.MD
+M	node_modules/docs/ignored.md
+M	build/docs/ignored.md
+M	dist/docs/ignored.mdx
+M	notes.txt
+
+commit bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+Author: Bob Example <bob@example.com>
+Date:   Wed Jan 31 12:00:00 2024 +0000
+
+M	src/app.ts
+M	scripts/tool.py
+M	docs/readme.md
+
+commit cccccccccccccccccccccccccccccccccccccccc
+Author: Cara Example <cara@example.com>
+Date:   Tue Jan 30 12:00:00 2024 +0000
+
+M	src/app.ts
+M	docs/readme.md
+D	docs/deleted.md

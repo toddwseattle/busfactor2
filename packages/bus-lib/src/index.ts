@@ -1,6 +1,18 @@
 import type { BusfactorReport } from "./types.js";
 export { analyzeGitLog } from "./analyzer.js";
 export {
+  DEFAULT_FILE_CATEGORIES,
+  DEFAULT_IGNORED_PATH_SEGMENTS,
+  DEFAULT_TRACKED_STATUSES,
+  categoryMatchesPath,
+  classifyFileChange,
+  classifyFilePath,
+  isIgnoredPath,
+  isTrackedStatus,
+  normalizePathForClassification,
+} from "./categories.js";
+export type { ClassifiedFilePath } from "./categories.js";
+export {
   DEFAULT_ANALYSIS_OPTIONS,
   DEFAULT_REPORT_SECTIONS,
   DEFAULT_SECTION_IDS,
@@ -20,6 +32,8 @@ export type {
   BusfactorReportSection,
   BusfactorReportSource,
   BusfactorReportSummary,
+  DefaultReportSectionId,
+  FileCategoryDefinition,
   FileContributionReport,
   FileContributorReport,
   GitFileChange,

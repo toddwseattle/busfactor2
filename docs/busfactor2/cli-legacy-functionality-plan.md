@@ -39,6 +39,13 @@ Out of scope for the first slice:
 - changing old scoring rules
 - broad custom category configuration
 
+Follow-up category expansion is tracked in
+[`docs/bus-lib/plugable-plan.md`](../bus-lib/plugable-plan.md) and the
+Milestone 2 items in [`docs/bus-cli/work-items.md`](../bus-cli/work-items.md).
+The CLI compatibility rule for that work is that `bus-cli` keeps calling
+`analyzeGitLog(input.text, { source })` and renders returned report sections;
+filetype rules stay in `bus-lib`.
+
 ## Compatibility Target
 
 The old app lives in `legacy/criesbeck-browser-app`. The first CLI slice should
