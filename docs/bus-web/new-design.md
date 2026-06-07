@@ -316,6 +316,66 @@ Acceptance:
 - The file table preserves the legacy app's scan pattern: contributors are
   columns, not a single collapsed activity column.
 
+### 8a. Refine File Table Density
+
+Refine `BusFactorSection` into two table-density modes: default and compact.
+The goal is to preserve the legacy contributor-column scan pattern while making
+the table easier to use on narrower screens.
+
+Shared behavior:
+
+- Keep one contributor column per author in both modes.
+- Add a table header toolbar with a native radio group for view mode:
+  - `Default`
+  - `Compact`
+- Use default mode on first render.
+- The selected mode can be local component state. Do not add persistence yet.
+- Keep the table horizontally scrollable.
+- Keep `High Risk` as the only risk label in the first pass.
+- Do not convey risk by color alone. Compact mode may use color, but the header
+  toolbar must include a visible `High Risk` legend and risk cells must have
+  accessible labels.
+
+Default mode:
+
+- Replace the separate `Total Edits`, `Active Contributors`, and `Status`
+  columns with one `Edits (contributors)` column.
+- In that cell, show the combined value as the primary line, for example:
+  `7 (3)`.
+- If the file is risky, use the high-risk color treatment as the background for
+  the `Edits (contributors)` cell.
+- The cell should expose a complete accessible label, for example:
+  `src/app.js, 7 edits, 3 active contributors, High Risk`.
+- Contributor cells should show both percentage and edit count, as they do now.
+- File path remains the full path in default mode.
+
+Compact mode:
+
+- Keep the same table columns as default mode, but reduce row height and cell
+  content.
+- The file column shows only the base filename.
+- The full path is available in a tooltip and in the accessible label.
+- The `Edits (contributors)` column shows only the compact value, for example:
+  `7 (3)`.
+- If the file is risky, use the high-risk color treatment on that compact stats
+  cell and rely on the visible toolbar legend plus accessible cell label for
+  the text status.
+- Contributor cells show only the percentage.
+- Contributor cell tooltips and accessible labels include both percentage and
+  edit count.
+
+Acceptance:
+
+- Tests cover the default mode table headers and `7 (3)` style stats cell.
+- Tests cover risky file stats cells using the high-risk treatment and an
+  accessible `High Risk` label.
+- Tests cover compact mode toggling through the radio group.
+- Tests cover compact mode filename display with full path available through
+  tooltip/accessibility.
+- Tests cover compact contributor cells showing percentages while preserving
+  edit counts in tooltip/accessibility.
+- Existing contributor-column tests continue to pass.
+
 ### 9. Add File Distribution Visualization
 
 - Implement the chart as file distribution by report section, not LOC.
