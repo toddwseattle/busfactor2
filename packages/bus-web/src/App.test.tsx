@@ -256,24 +256,60 @@ describe("App", () => {
     ).toBeVisible();
   });
 
-  it("keeps report section labels visible with high-risk status only", async () => {
+  it("renders bus factor file tables with high-risk status only", async () => {
     render(<App />);
 
     uploadGitLog(gitLogSample);
 
     expect(
-      await screen.findByRole("heading", { level: 3, name: "Overall" }),
+      await screen.findByRole("heading", { level: 2, name: "Overall" }),
+    ).toBeInTheDocument();
+
+    const overallTable = screen.getByRole("table", {
+      name: "Bus factor by file for Overall",
+    });
+
+    expect(
+      within(overallTable).getByRole("columnheader", { name: "File Path" }),
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("heading", { level: 3, name: "TS/JS/CSS" }),
+      within(overallTable).getByRole("columnheader", { name: "Total Edits" }),
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("heading", { level: 3, name: "Python" }),
+      within(overallTable).getByRole("columnheader", {
+        name: "Active Contributors",
+      }),
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("heading", { level: 3, name: "Markdown" }),
+      within(overallTable).getByRole("columnheader", { name: "Status" }),
     ).toBeInTheDocument();
-    expect(screen.getAllByText("High Risk").length).toBeGreaterThan(0);
+    expect(
+      within(overallTable).getByRole("columnheader", {
+        name: "Contributor Activity",
+      }),
+    ).toBeInTheDocument();
+
+    expect(within(overallTable).getByText("src/app.js")).toBeInTheDocument();
+    expect(
+      within(overallTable).getAllByText("Alice Example").length,
+    ).toBeGreaterThan(0);
+    expect(
+      within(overallTable).getAllByText("High Risk").length,
+    ).toBeGreaterThan(0);
+
+    expect(
+      screen.getByRole("table", { name: "Bus factor by file for TS/JS/CSS" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { level: 2, name: "Python" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText("No tracked files in this section."),
+    ).toBeInTheDocument();
+
+    expect(
+      screen.queryByRole("heading", { name: "Section placeholders" }),
+    ).not.toBeInTheDocument();
     expect(screen.queryByText(/Low Familiarity/i)).not.toBeInTheDocument();
   });
 

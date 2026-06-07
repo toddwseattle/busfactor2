@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { analyzeGitLog } from "bus-lib";
 import type { BusfactorReport } from "bus-lib";
+import { BusFactorSection } from "./components/BusFactorSection.js";
 import { CommitStatsTable } from "./components/CommitStatsTable.js";
-import { ReportSectionPlaceholders } from "./components/ReportSectionPlaceholders.js";
 import { ReportSummary } from "./components/ReportSummary.js";
 import { SectionDistributionChart } from "./components/SectionDistributionChart.js";
 import { UploadPanel } from "./components/UploadPanel.js";
@@ -215,7 +215,9 @@ export const App = () => {
               commitStats={state.report.commitStats}
               weeks={state.report.weeks}
             />
-            <ReportSectionPlaceholders sections={state.report.sections} />
+            {state.report.sections.map((section) => (
+              <BusFactorSection key={section.id} section={section} />
+            ))}
           </>
         ) : null}
       </main>
