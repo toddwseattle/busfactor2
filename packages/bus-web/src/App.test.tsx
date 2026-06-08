@@ -262,21 +262,31 @@ describe("App", () => {
     uploadGitLog(gitLogSample);
 
     const overallButton = await screen.findByRole("button", {
-      name: /Overall/,
+      name: /Overall by file/,
     });
-    const tsJsCssButton = screen.getByRole("button", { name: /TS\/JS\/CSS/ });
-    const pythonButton = screen.getByRole("button", { name: /Python/ });
-    const markdownButton = screen.getByRole("button", { name: /Markdown/ });
+    const tsJsCssButton = screen.getByRole("button", {
+      name: /TS\/JS\/CSS by file/,
+    });
+    const pythonButton = screen.getByRole("button", {
+      name: /Python by file/,
+    });
+    const markdownButton = screen.getByRole("button", {
+      name: /Markdown by file/,
+    });
 
     expect(overallButton).toHaveAttribute("aria-expanded", "true");
     expect(tsJsCssButton).toHaveAttribute("aria-expanded", "false");
     expect(pythonButton).toHaveAttribute("aria-expanded", "false");
     expect(markdownButton).toHaveAttribute("aria-expanded", "false");
     expect(overallButton).toHaveAttribute("aria-controls");
-
+    expect(within(overallButton).getByText("-")).toBeInTheDocument();
+    expect(within(tsJsCssButton).getByText("+")).toBeInTheDocument();
     expect(
-      screen.getByRole("heading", { level: 2, name: "Overall" }),
-    ).toBeInTheDocument();
+      within(overallButton).getByText("11 total edits, 3 contributors"),
+    ).toBeVisible();
+    expect(
+      screen.queryByRole("heading", { level: 2, name: "Overall" }),
+    ).not.toBeInTheDocument();
 
     const overallTable = screen.getByRole("table", {
       name: "Bus factor by file for Overall",
@@ -327,6 +337,8 @@ describe("App", () => {
 
     expect(overallButton).toHaveAttribute("aria-expanded", "false");
     expect(tsJsCssButton).toHaveAttribute("aria-expanded", "true");
+    expect(within(overallButton).getByText("+")).toBeInTheDocument();
+    expect(within(tsJsCssButton).getByText("-")).toBeInTheDocument();
     expect(
       screen.getByRole("table", { name: "Bus factor by file for TS/JS/CSS" }),
     ).toBeInTheDocument();
@@ -342,8 +354,8 @@ describe("App", () => {
 
     expect(pythonButton).toHaveAttribute("aria-expanded", "true");
     expect(
-      screen.getByRole("heading", { level: 2, name: "Python" }),
-    ).toBeInTheDocument();
+      screen.queryByRole("heading", { level: 2, name: "Python" }),
+    ).not.toBeInTheDocument();
     expect(
       screen.getByText("No tracked files in this section."),
     ).toBeInTheDocument();

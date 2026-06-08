@@ -28,11 +28,6 @@ const formatContributorLabel = (contributorCount: number) =>
     contributorCount === 1 ? "contributor" : "contributors"
   }`;
 
-const formatFileLabel = (fileCount: number, qualifier?: string) => {
-  const label = fileCount === 1 ? "file" : "files";
-  return `${formatCount(fileCount)} ${qualifier === undefined ? "" : `${qualifier} `}${label}`;
-};
-
 const formatStatsValue = (file: FileContributionReport) =>
   `${formatCount(file.totalEdits)} (${formatCount(file.activeContributorCount)})`;
 
@@ -119,34 +114,16 @@ export const BusFactorSection = ({ section }: BusFactorSectionProps) => {
 
   return (
     <section
-      aria-labelledby={`${section.id}-bus-factor-heading`}
+      aria-label={`${section.label} bus factor file grid`}
       className="rounded-lg border border-[#d8d0c4] bg-white p-5 shadow-sm"
     >
-      <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#4e2a84]">
-            Bus factor by file
-          </p>
-          <h2
-            id={`${section.id}-bus-factor-heading`}
-            className="mt-2 text-2xl font-semibold text-[#221635]"
-          >
-            {section.label}
-          </h2>
-        </div>
-        <p className="text-sm font-medium text-[#62576f]">
-          {formatFileLabel(section.totalFiles, "tracked")} ·{" "}
-          {formatFileLabel(section.riskFiles, "high-risk")}
-        </p>
-      </div>
-
       {section.files.length === 0 ? (
-        <p className="mt-5 rounded-md border border-dashed border-[#d8d0c4] bg-[#fbfaf7] p-4 text-sm leading-6 text-[#62576f]">
+        <p className="rounded-md border border-dashed border-[#d8d0c4] bg-[#fbfaf7] p-4 text-sm leading-6 text-[#62576f]">
           No tracked files in this section.
         </p>
       ) : (
         <>
-          <div className="mt-5 flex flex-col gap-3 border-y border-[#ece4d8] py-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-col gap-3 border-b border-[#ece4d8] pb-3 sm:flex-row sm:items-center sm:justify-between">
             <fieldset
               aria-label={`${section.label} table density`}
               className="flex flex-wrap items-center gap-3"

@@ -92,14 +92,21 @@ afterEach(() => {
 });
 
 describe("BusFactorSection", () => {
-  it("renders the section heading and tracked-file summary", () => {
+  it("renders the file grid controls without its own visible section header", () => {
     render(<BusFactorSection section={createSection()} />);
 
     expect(
-      screen.getByRole("heading", { level: 2, name: "TS/JS/CSS" }),
+      screen.queryByRole("heading", { level: 2, name: "TS/JS/CSS" }),
+    ).not.toBeInTheDocument();
+    expect(screen.queryByText("Bus factor by file")).not.toBeInTheDocument();
+    expect(
+      screen.queryByText("2 tracked files · 1 high-risk file"),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.getByRole("group", { name: "TS/JS/CSS table density" }),
     ).toBeInTheDocument();
     expect(
-      screen.getByText("2 tracked files · 1 high-risk file"),
+      screen.getByText("High Risk stats cells are highlighted."),
     ).toBeInTheDocument();
   });
 
@@ -277,8 +284,8 @@ describe("BusFactorSection", () => {
     );
 
     expect(
-      screen.getByRole("heading", { level: 2, name: "Python" }),
-    ).toBeInTheDocument();
+      screen.queryByRole("heading", { level: 2, name: "Python" }),
+    ).not.toBeInTheDocument();
     expect(
       screen.getByText("No tracked files in this section."),
     ).toBeInTheDocument();
